@@ -13,18 +13,18 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "dial.h"
-#include "TransferFunction.h"
 #include "PluginProcessor.h"
 //==============================================================================
 /*
 */
+
 class Tab1    : public Component,
                        Slider::Listener,
                        Button::Listener
 {
 public:
     Tab1(CompressorTarrAudioProcessor&);
-    ~Tab1();
+    ~Tab1();  
 
     void paint (Graphics&) override;
     void resized() override;
@@ -32,10 +32,14 @@ public:
     void paintMixDialBackground(Graphics& g);
     void sliderValueChanged(Slider* slider) override;
     void buttonClicked (Button* button) override; // [2]
-private:
     
-    ScopedPointer<FFAU::LevelMeterLookAndFeel> lnf;
-    ScopedPointer<FFAU::LevelMeter> meter;
+    float* getAxisSlider(){
+        *ptrThresh = threshSlider.getValue();
+        return ptrThresh;
+    };
+    
+private:
+    float* ptrThresh;
     Slider inputSlider;
     Slider outputSlider;
     Slider mixSlider;
@@ -47,8 +51,11 @@ private:
     Slider hpfSlider;
     TextButton whiteBox;
     TextButton help;
-//    TransferFunction trans; TransferFunction not a type -- issue unresolved
+    
+          // not a type -- issue unresolved 
     
     CompressorTarrAudioProcessor& processor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tab1)
 };
+
+

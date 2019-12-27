@@ -12,17 +12,8 @@
 #include "Tab1.h"
 
 //==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p) //trans(p)
+Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), ptrThresh(nullptr)
 {
-    lnf = new FFAU::LevelMeterLookAndFeel();
-    // adjust the colours to how you like them, e.g.
-    lnf->setColour (FFAU::LevelMeter::lmMeterGradientLowColour, juce::Colours::green);
-    lnf->setColour(FFAU::LevelMeter::lmOutlineColour, juce::Colours::lightgrey);
-    meter = new FFAU::LevelMeter(); // See FFAU::LevelMeter::MeterFlags for options
-    meter->setLookAndFeel (lnf);
-    meter->setMeterSource (&processor.getMeterSource());
-    meter->setBounds(745, 80, 30, getHeight()-40);
-    addAndMakeVisible (meter);
     
     inputSlider.addListener(this);
     inputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
@@ -114,12 +105,12 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p) //trans(p)
     help.setButtonText("?");
     addAndMakeVisible(help);
     
-   // addAndMakeVisible(&trans);
+   
 }
 
 Tab1::~Tab1()
 {
-}
+};
 
 void Tab1::buttonClicked (Button* button) // [2]
 {
@@ -218,7 +209,7 @@ void Tab1::paint (Graphics& g)
     g.drawFittedText("Release", 475, 275, 100, 100, Justification::centred, 1);
     g.drawFittedText("HPF", 537, 275, 100, 100, Justification::centred, 1);
     g.drawFittedText("make_up", 625, 275, 100, 100, Justification::centred, 1);
-}
+};
 
 void Tab1::resized()
 {

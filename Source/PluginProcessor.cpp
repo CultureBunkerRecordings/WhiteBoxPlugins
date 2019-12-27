@@ -165,7 +165,6 @@ void CompressorTarrAudioProcessor::processBlock (AudioBuffer<float>& buffer, Mid
         
         float x = buffer.getWritePointer (channel)[sample] * linIn;
         
-
         meterSource.measureBlock(buffer);
         
         //this is where compressor goes

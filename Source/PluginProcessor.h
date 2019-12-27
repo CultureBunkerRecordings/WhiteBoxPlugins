@@ -66,12 +66,12 @@ public:
     float mix = 0.1;
     float knee = 0.0;
 
+    
 private:
     FFAU::LevelMeterSource meterSource; 
     float prevGainChange = 0.0;
     float Fs = 48000;
     
-
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CompressorTarrAudioProcessor)
 };
