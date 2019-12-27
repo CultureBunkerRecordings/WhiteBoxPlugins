@@ -3,6 +3,10 @@
 <JUCERPROJECT id="p5Fdm6" name="compressorTarr" projectType="audioplug" jucerVersion="5.4.3">
   <MAINGROUP id="HL4OYZ" name="compressorTarr">
     <GROUP id="{2981F006-58B5-5269-28B9-1D5EF414D7B1}" name="Source">
+      <FILE id="mvrTw6" name="TransferFunction.cpp" compile="1" resource="0"
+            file="Source/TransferFunction.cpp"/>
+      <FILE id="aaXxJj" name="TransferFunction.h" compile="0" resource="0"
+            file="Source/TransferFunction.h"/>
       <FILE id="Wx6PxU" name="Tab1.cpp" compile="1" resource="0" file="Source/Tab1.cpp"/>
       <FILE id="IWdBES" name="Tab1.h" compile="0" resource="0" file="Source/Tab1.h"/>
       <FILE id="urZTb4" name="dial.cpp" compile="1" resource="0" file="Source/dial.cpp"/>
@@ -15,6 +19,8 @@
             file="Source/PluginEditor.cpp"/>
       <FILE id="uybyae" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
     </GROUP>
+    <FILE id="kEnQF5" name="Tab2.cpp" compile="1" resource="0" file="Source/Tab2.cpp"/>
+    <FILE id="Yq4EWT" name="Tab2.h" compile="0" resource="0" file="Source/Tab2.h"/>
   </MAINGROUP>
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
