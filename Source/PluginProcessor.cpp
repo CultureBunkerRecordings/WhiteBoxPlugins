@@ -180,7 +180,7 @@ void CompressorTarrAudioProcessor::processBlock (AudioBuffer<float>& buffer, Mid
         
         float xSC = 0;
         
-        if (2*(x_dB - T) < knee)
+        if (2*(x_dB - T) < -knee)
         {
             //no comp
             xSC = x_dB;
@@ -188,7 +188,7 @@ void CompressorTarrAudioProcessor::processBlock (AudioBuffer<float>& buffer, Mid
         else if (2* abs(x_dB - T)<= knee)
         {
             //yes comp
-            xSC = x_dB+(1/R - 1)*(x_dB - T+knee/2)*2/(2*knee);
+            xSC = x_dB+(1/R - 1)*std::pow(x_dB - T+knee/2, 2)/(2*knee);
         }
         else{
             xSC = T+(x_dB - T)/R;

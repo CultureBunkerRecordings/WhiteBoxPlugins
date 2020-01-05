@@ -13,7 +13,7 @@
 
 //==============================================================================
 CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (CompressorTarrAudioProcessor& p)
-: C(p), AudioProcessorEditor (&p), processor (p), tab1(p), tabs(TabbedButtonBar::Orientation::TabsAtTop), trans(p)
+: /*C(p),*/ AudioProcessorEditor (&p), processor (p), tab1(p), tabs(TabbedButtonBar::Orientation::TabsAtTop)
 { 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -38,7 +38,6 @@ CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (Compress
     meter->setBounds(745, 50, 30, getHeight()-75);
     addAndMakeVisible (meter);
     
-     addAndMakeVisible(&trans);
 }
 
 CompressorTarrAudioProcessorEditor::~CompressorTarrAudioProcessorEditor()

@@ -12,30 +12,32 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
-
 //==============================================================================
 /*
 */
 
-class TransferFunction    : public Component,
-                            public Timer
+class TransferFunction    : public Component
 {
 public:
-    TransferFunction(CompressorTarrAudioProcessor&);
-    ~TransferFunction(); 
-    void timerCallback() override {
-        if( get ){
-            yAxis = get(); 
-            repaint();
-        }
-    };
+    TransferFunction(CompressorTarrAudioProcessor&); 
+    ~TransferFunction();
     void paint (Graphics&) override;
-    void resized() override;
+    void resized() override; 
     
+    float yAxisThresh;
+    float xAxisThresh;
+    float yAxisRatio;
+    float yKnee;
+    float xKnee;
+    float xAxisInput;
+    float yAxisInput;
+
+    float yWitKnee;
     
-    std::function<float*()> get;
-    float* yAxis;
+    float xComp;
+    float yComp;
+
     int count;
-    CompressorTarrAudioProcessor& processor; 
+    CompressorTarrAudioProcessor& processor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransferFunction)
 };

@@ -12,8 +12,9 @@
 #include "Tab1.h"
 
 //==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), ptrThresh(nullptr)
+Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p) 
 {
+    Timer::startTimerHz(60);
     
     inputSlider.addListener(this);
     inputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
@@ -105,7 +106,7 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), ptrThresh(nullptr)
     help.setButtonText("?");
     addAndMakeVisible(help);
     
-   
+    addAndMakeVisible(&trans);
 }
 
 Tab1::~Tab1()

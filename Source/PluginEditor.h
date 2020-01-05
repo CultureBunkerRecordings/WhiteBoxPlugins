@@ -114,8 +114,7 @@ private:
     Tab1 tab1;
     Tab2 tab2;
     TabbedComponent tabs;
-    Connector C;
-    TransferFunction trans;
+    //Connector C;
     
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
