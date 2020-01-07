@@ -12,7 +12,7 @@
 #include "Tab1.h"
 
 //==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p) 
+Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p)
 {
     Timer::startTimerHz(60);
     
@@ -107,16 +107,112 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     addAndMakeVisible(help);
     
     addAndMakeVisible(&trans);
+    
+    inputSlider.addMouseListener(&click, false);
+    inputHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    inputHelp.setPosition(&inputSlider);
+    
+    outputSlider.addMouseListener(&click, false);
+    outputHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    outputHelp.setPosition(&outputSlider);
+    
+    mixSlider.addMouseListener(&click, false);
+    mixHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    mixHelp.setPosition(&mixSlider);
+    
+    threshSlider.addMouseListener(&click, false);
+    threshHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    threshHelp.setPosition(&threshSlider);
+    
+    ratioSlider.addMouseListener(&click, false);
+    ratioHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    ratioHelp.setPosition(&ratioSlider);
+    
+    attackSlider.addMouseListener(&click, false);
+    attackHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    attackHelp.setPosition(&attackSlider);
+    
+    kneeSlider.addMouseListener(&click, false);
+    kneeHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    kneeHelp.setPosition(&kneeSlider);
+    
+    releaseSlider.addMouseListener(&click, false);
+    releaseHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    releaseHelp.setPosition(&releaseSlider);
+
+    hpfSlider.addMouseListener(&click, false);
+    hpfHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
+    hpfHelp.setPosition(&hpfSlider);
+
 }
 
 Tab1::~Tab1()
 {
 };
 
-void Tab1::buttonClicked (Button* button) // [2]
+void Tab1::timerCallback()
 {
+    trans.yAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
+    trans.xAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
+    trans.yAxisRatio = getRatioValue();
+    trans.yKnee = jmap<float>(getKneeValue(), 0, 10, 1, 0);
+    trans.xKnee = jmap<float>(getKneeValue(), 0, 10, 0.0f, 1.0f);
+    trans.xAxisInput = jmap<float>(getInputValue(),-48.0f, 12.0f, 400, 0);
+    trans.yAxisInput = jmap<float>(getInputValue(), -48.0f, 12.0f, 150, 0);
+    trans.repaint();
+    
+        
+    if (inputSlider.isMouseButtonDown()){
+        inputHelp.showAt(&inputSlider,AttributedString(inputMessage), 1000);
+        addAndMakeVisible(inputHelp);
+    };
+    
+    if (outputSlider.isMouseButtonDown()){
+        outputHelp.showAt(&outputSlider,AttributedString(outputMessage), 1000);
+        addAndMakeVisible(outputHelp);
+    };
+    
+    if (mixSlider.isMouseButtonDown()){
+        mixHelp.showAt(&mixSlider,AttributedString(mixMessage), 1000);
+        addAndMakeVisible(mixHelp);
+    };
+    
+    if (threshSlider.isMouseButtonDown()){
+        threshHelp.showAt(&threshSlider,AttributedString(threshMessage), 1000);
+        addAndMakeVisible(threshHelp);
+    };
+    
+    if (ratioSlider.isMouseButtonDown()){
+        ratioHelp.showAt(&ratioSlider,AttributedString(ratioMessage), 1000);
+        addAndMakeVisible(ratioHelp);
+    };
+    
+    if (attackSlider.isMouseButtonDown()){
+        attackHelp.showAt(&attackSlider,AttributedString(attackMessage), 1000);
+        addAndMakeVisible(attackHelp);
+    };
+    
+    if (kneeSlider.isMouseButtonDown()){
+        kneeHelp.showAt(&kneeSlider,AttributedString(kneeMessage), 1000);
+        addAndMakeVisible(kneeHelp);
+    };
+    
+    if (releaseSlider.isMouseButtonDown()){
+        releaseHelp.showAt(&releaseSlider,AttributedString(releaseMessage), 1000);
+        addAndMakeVisible(releaseHelp);
+    };
+    
+    if (hpfSlider.isMouseButtonDown()){
+        hpfHelp.showAt(&hpfSlider,AttributedString(hpfMessage), 1000);
+        addAndMakeVisible(hpfHelp);
+    };
+};
+    
+void Tab1::buttonClicked (Button* button) // [2]
+{ 
     if (button == &whiteBox){
     };
+    
 };
 void Tab1::sliderValueChanged(Slider* slider)
 {

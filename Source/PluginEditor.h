@@ -15,7 +15,6 @@
 #include "dial.h"
 #include "Tab1.h"
 #include "Tab2.h"
-#include "Connector.h"
 #include "TransferFunction.h"
 //==============================================================================
 /**

@@ -51,19 +51,10 @@ public:
     }
     
     float getInputValue(){
-        input = inputSlider.getValue();
+        input = inputSlider.getValue(); 
         return input;
     }
-    void timerCallback() override{
-        trans.yAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
-        trans.xAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
-        trans.yAxisRatio = getRatioValue();
-        trans.yKnee = jmap<float>(getKneeValue(), 0, 10, 1, 0); 
-        trans.xKnee = jmap<float>(getKneeValue(), 0, 10, 0.0f, 1.0f);
-        trans.xAxisInput = jmap<float>(getInputValue(),-48.0f, 12.0f, 400, 0);
-        trans.yAxisInput = jmap<float>(getInputValue(), -48.0f, 12.0f, 150, 0);
-        trans.repaint(); 
-    };
+    void timerCallback() override;
     
 private:
     TransferFunction trans;
@@ -72,6 +63,7 @@ private:
     float ratio;
     float knee;
     float input;
+ 
     Slider inputSlider;
     Slider outputSlider;
     Slider mixSlider;
@@ -82,8 +74,29 @@ private:
     Slider releaseSlider;
     Slider hpfSlider;
     TextButton whiteBox;
-    TextButton help;
+    TextButton help; 
     
+    String inputMessage = "Input";
+    String outputMessage = "Output";
+    String mixMessage = "Mix";
+    String threshMessage = "Threshold";
+    String ratioMessage = "Ratio";
+    String attackMessage = "attack";
+    String kneeMessage = "Knee";
+    String releaseMessage = "Release";
+    String hpfMessage = "High Pass Filter";
+    
+    BubbleMessageComponent inputHelp;
+    BubbleMessageComponent outputHelp;
+    BubbleMessageComponent mixHelp;
+    BubbleMessageComponent threshHelp;
+    BubbleMessageComponent ratioHelp;
+    BubbleMessageComponent kneeHelp;
+    BubbleMessageComponent attackHelp;
+    BubbleMessageComponent releaseHelp;
+    BubbleMessageComponent hpfHelp;
+    
+    MouseListener click;
           // not a type -- issue unresolved 
     
     CompressorTarrAudioProcessor& processor;
