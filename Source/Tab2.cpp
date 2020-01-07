@@ -12,11 +12,38 @@
 #include "Tab2.h"
 
 //==============================================================================
-Tab2::Tab2()
+Tab2::Tab2(CompressorTarrAudioProcessor& p): processor(p), trans(p)
 {
     // In your constructor, you should add any child components, and
     // initialise any special settings that your component needs.
-
+ 
+    addAndMakeVisible(trans);
+    
+    abs.setColour(TextButton::textColourOffId, juce::Colours::black);
+    abs.setButtonText("abs");
+    abs.setBounds(75, 250, 50, 50);
+    addAndMakeVisible(abs);
+    
+    dB.setColour(TextButton::textColourOffId, juce::Colours::black);
+    dB.setButtonText("dB");
+    dB.setBounds(150, 250, 50, 50);
+    addAndMakeVisible(dB);
+//
+    gainComputer.setColour(TextButton::textColourOffId, juce::Colours::black);
+    gainComputer.setButtonText("Gain Computer");
+    gainComputer.setBounds(225, 225, 100, 100);
+    addAndMakeVisible(gainComputer);
+//
+    levelDetector.setColour(TextButton::textColourOffId, juce::Colours::black);
+    levelDetector.setButtonText("Level Detector");
+    levelDetector.setBounds(425, 225, 100, 100);
+    addAndMakeVisible(levelDetector);
+//
+    lin.setColour(TextButton::textColourOffId, juce::Colours::black);
+    lin.setButtonText("lin");
+    lin.setBounds(625, 250, 50, 50);
+    addAndMakeVisible(lin);
+    
 }
 
 Tab2::~Tab2()
@@ -32,15 +59,28 @@ void Tab2::paint (Graphics& g)
        drawing code..
     */
 
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
+    g.fillAll (Colours::whitesmoke);   // clear the background
 
-    g.setColour (Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (Colours::white);
-    g.setFont (14.0f);
-    g.drawText ("Tab2", getLocalBounds(),
-                Justification::centred, true);   // draw some placeholder text
+    g.setColour (Colours::black);
+    
+    Path p1;
+    Path p2;
+    
+    p1.startNewSubPath(25, 200);
+    p1.lineTo(725, 200);
+    
+    p2.startNewSubPath(50, 200);
+    p2.lineTo(50, 275);
+    p2.lineTo(700, 275);
+    p2.lineTo(700, 200);
+    
+    g.strokePath(p1, PathStrokeType(2));
+    g.strokePath(p2, PathStrokeType(2));
+    
+    g.setColour(Colours::white);
+    g.fillEllipse(350, 250, 50, 50);
+    g.fillEllipse(550, 250, 50, 50);
+       // draw some placeholder text
 }
 
 void Tab2::resized()

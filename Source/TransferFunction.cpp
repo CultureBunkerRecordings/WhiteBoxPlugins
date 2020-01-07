@@ -32,7 +32,7 @@ void TransferFunction::paint(Graphics& g)
        You should replace everything in this method with your own
        drawing code..
     */
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));   // clear the background
+    g.fillAll (juce::Colours::grey);
     
     Path p;
     
@@ -59,9 +59,24 @@ void TransferFunction::paint(Graphics& g)
         float ycor = jmap<float>(yOut, 0.0f, 1.0f, getHeight(), 0.0);
         p.lineTo(i, ycor);
     }
-    g.setColour (Colours::white);
-    g.strokePath(p, PathStrokeType{ 1 });
     
+    Path p2;
+    float gridY = 18.75;
+    float gridX = 50;
+    for(int j = 0; j<8; ++j){
+        p2.startNewSubPath(0, gridY * j);
+        p2.lineTo(getWidth(), gridY * j);
+        for(int x = 0; x<8; ++x){
+            p2.startNewSubPath(gridX * x, 0);
+            p2.lineTo(gridX * x, getHeight());
+        }
+    };
+    
+    g.setColour(Colours::darkgrey);
+    g.strokePath(p2, PathStrokeType(1));
+    
+    g.setColour (Colours::white);
+    g.strokePath(p, PathStrokeType(2));
 }
 
 void TransferFunction::resized()

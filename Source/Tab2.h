@@ -11,19 +11,27 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-
+#include "TransferFunction.h"
 //==============================================================================
 /*
 */
 class Tab2    : public Component
 {
 public:
-    Tab2();
+    Tab2(CompressorTarrAudioProcessor&);
     ~Tab2();
 
     void paint (Graphics&) override;
     void resized() override;
 
 private:
+    TransferFunction trans;
+    TextButton abs;
+    TextButton dB;
+    TextButton gainComputer;
+    TextButton levelDetector;
+    TextButton lin;
+    
+    CompressorTarrAudioProcessor& processor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Tab2)
 };
