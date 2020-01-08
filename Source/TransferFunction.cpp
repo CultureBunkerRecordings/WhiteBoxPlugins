@@ -11,7 +11,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "TransferFunction.h"
 //==============================================================================
-TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p): processor(p), xAxisThresh(0.5), yAxisThresh(0), yAxisRatio(2), xKnee(0.1), yKnee(0.1), xAxisInput(0), yAxisInput(0), count(0), xComp(0), yComp(0)
+TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p): processor(p), xAxisThresh(0.5), yAxisRatio(2), xKnee(0.1), xAxisInput(0), count(0), xComp(0), yComp(0)
 {
      //In your constructor, you should add any child components, and
     //initialise any special settings that your component needs.
@@ -25,18 +25,15 @@ TransferFunction::~TransferFunction()
 
 void TransferFunction::paint(Graphics& g)
 {
-    
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
+    //*******************************************************************************
+    //background colour
     g.fillAll (juce::Colours::grey);
     
+    //*******************************************************************************
+    //path to draw transfer function from
     Path p;
     
-    
+    //loop for drawing tranfer function, transfer function taken from PluginProcessor.cpp
     for (int i = 0; i < getWidth(); ++i){
         
         float insample = jmap<float>(i, 0.0, getWidth(), 0.0, 1.0);
@@ -60,9 +57,14 @@ void TransferFunction::paint(Graphics& g)
         p.lineTo(i, ycor);
     }
     
+    //*******************************************************************************
+    //path to draw grid from
     Path p2;
-    float gridY = 18.75;
-    float gridX = 50;
+    
+    float gridY = 18.75; //height/8
+    float gridX = 50;//width/8
+    
+    //loop for drawing graph
     for(int j = 0; j<8; ++j){
         p2.startNewSubPath(0, gridY * j);
         p2.lineTo(getWidth(), gridY * j);
@@ -72,11 +74,15 @@ void TransferFunction::paint(Graphics& g)
         }
     };
     
+    //*******************************************************************************
+    //set colour and fill paths
+    
     g.setColour(Colours::darkgrey);
     g.strokePath(p2, PathStrokeType(1));
     
     g.setColour (Colours::white);
     g.strokePath(p, PathStrokeType(2));
+    
 }
 
 void TransferFunction::resized()

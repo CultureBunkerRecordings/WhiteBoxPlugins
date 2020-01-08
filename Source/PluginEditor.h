@@ -20,6 +20,9 @@
 /**
 */
 
+//*******************************************************************************
+// OtherlookAndFeel Class
+// override of LookAndFeel Class, slider and textButton look changed
 
 class OtherLookAndFeel : public LookAndFeel_V4
 {
@@ -29,6 +32,7 @@ public:
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                            const float rotaryStartAngle, const float rotaryEndAngle, Slider& slider) override
     {
+        //object to perform rotation
         AffineTransform rotator;
         
         //load image
@@ -56,6 +60,7 @@ public:
         g.setColour (Colours::darkgrey.withAlpha (0.5f));
         g.fillRect (buttonArea);
 
+        //when button down background is offset
         auto offset = isButtonDown ? -edge / 2 : -edge;
         buttonArea.translate (offset, offset);
         
@@ -65,13 +70,12 @@ public:
     
     void drawButtonText (Graphics& g, TextButton& button, bool isMouseOverButton, bool isButtonDown) override
     {
-
+        
         auto font = getTextButtonFont (button, button.getHeight());
         g.setFont (font);
         g.setColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
                                         : TextButton::textColourOffId)
                      .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f));
-        
         
         auto yIndent = jmin (4, button.proportionOfHeight (0.3f));
         auto cornerSize = jmin (button.getHeight(), button.getWidth()) / 2;
@@ -93,6 +97,9 @@ public:
     
 };
 
+//*******************************************************************************
+
+// CompressorTarrAudioProcessorEditor class
 
 class CompressorTarrAudioProcessorEditor  : public AudioProcessorEditor
 {
@@ -104,15 +111,19 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     
+    //*******************************************************************************
+    //member variables
 private:
+    //look and feel for third party ffmeter
     ScopedPointer<FFAU::LevelMeterLookAndFeel> lnf;
     ScopedPointer<FFAU::LevelMeter> meter;
-    
+    //instance of OtherlookAndFeel
     OtherLookAndFeel otherLookAndFeel;
     
+    //TabbedComponent tabs owns classes Tab1 and Tab2.
+    TabbedComponent tabs;
     Tab1 tab1;
     Tab2 tab2;
-    TabbedComponent tabs;
     
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.

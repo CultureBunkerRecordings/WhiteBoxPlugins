@@ -24,15 +24,10 @@ public:
     void paint (Graphics&) override;
     void resized() override; 
     
-    float yAxisThresh;
     float xAxisThresh;
-    float yAxisRatio;
-    float yKnee;
     float xKnee;
     float xAxisInput;
-    float yAxisInput;
-
-    float yWitKnee;
+    float yAxisRatio;
     
     float xComp;
     float yComp;

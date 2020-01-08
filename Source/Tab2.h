@@ -24,6 +24,8 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+    //*******************************************************************************
+    //member variables
 private:
     TransferFunction trans;
     TextButton abs;

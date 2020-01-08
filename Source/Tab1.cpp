@@ -14,7 +14,12 @@
 //==============================================================================
 Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p)
 {
+    //*******************************************************************************
+    //start loop for timerCallBack() at 60Hz
     Timer::startTimerHz(60);
+    
+    //*******************************************************************************
+    //setup sliders
     
     inputSlider.addListener(this);
     inputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
@@ -87,7 +92,7 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     releaseSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
     releaseSlider.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(releaseSlider);
-    //
+    
     hpfSlider.addListener(this);
     hpfSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
     hpfSlider.setBounds(550, 225, 75, 75);
@@ -96,6 +101,9 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     hpfSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
     hpfSlider.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(hpfSlider);
+    
+    //*******************************************************************************
+    //setup buttons
     
     whiteBox.addListener(this);
     whiteBox.setBounds(25, 160, 100, 20);
@@ -106,7 +114,11 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     help.setButtonText("?");
     addAndMakeVisible(help);
     
+    //make TransferFuncction visible
     addAndMakeVisible(&trans);
+    
+    //*******************************************************************************
+    //setup BubbleMessageComponents and MouseListener
     
     inputSlider.addMouseListener(&click, false);
     inputHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
@@ -150,18 +162,20 @@ Tab1::~Tab1()
 {
 };
 
+//*******************************************************************************
 void Tab1::timerCallback()
 {
-    trans.yAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
+    //*******************************************************************************
+    // map values from sliders and passes values to TransferFunction at regular intervals dictated by Timer
+    
     trans.xAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
     trans.yAxisRatio = getRatioValue();
-    trans.yKnee = jmap<float>(getKneeValue(), 0, 10, 1, 0);
     trans.xKnee = jmap<float>(getKneeValue(), 0, 10, 0.0f, 1.0f);
     trans.xAxisInput = jmap<float>(getInputValue(),-48.0f, 12.0f, 400, 0);
-    trans.yAxisInput = jmap<float>(getInputValue(), -48.0f, 12.0f, 150, 0);
-    trans.repaint();
     
-        
+    //*******************************************************************************
+    // show BubbleMessage if component is clicked
+    
     if (inputSlider.isMouseButtonDown()){
         inputHelp.showAt(&inputSlider,AttributedString(inputMessage), 1000);
         addAndMakeVisible(inputHelp);
@@ -206,14 +220,21 @@ void Tab1::timerCallback()
         hpfHelp.showAt(&hpfSlider,AttributedString(hpfMessage), 1000);
         addAndMakeVisible(hpfHelp);
     };
-};
+    //*******************************************************************************
+    //repaint canvas at each iteration
     
+    trans.repaint();
+};
+
+//*******************************************************************************
+//nothing happening yet
 void Tab1::buttonClicked (Button* button) // [2]
-{ 
-    if (button == &whiteBox){
-    };
-    
+{
 };
+
+//*******************************************************************************
+//primitive slider to processsor technique, need to utilise ValueTreeState
+
 void Tab1::sliderValueChanged(Slider* slider)
 {
     if (slider == &inputSlider)
@@ -253,6 +274,8 @@ void Tab1::sliderValueChanged(Slider* slider)
     }
 };
 
+//*******************************************************************************
+// code for drawing mixdial background
 void Tab1::paintMixDialBackground(Graphics& g)
 {
     Path p1;
@@ -266,6 +289,9 @@ void Tab1::paintMixDialBackground(Graphics& g)
     g.fillPath(p2);
     
 };
+
+//*******************************************************************************
+// code for drawing other dial backgrounds
 
 void Tab1::paintDialBackground(Graphics& g, int x, int y, int width, int height)
 {
@@ -296,6 +322,7 @@ void Tab1::paint (Graphics& g)
     paintDialBackground(g, 25, 200, 100, 100);
     paintMixDialBackground(g);
     paintDialBackground(g, 625, 200, 100, 100);
+    
     g.setColour(Colours::black);
     g.drawFittedText("input", 25, 275, 100, 100, Justification::centred, 1);
     g.drawFittedText("Thresh", 112, 275, 100, 100, Justification::centred, 1);

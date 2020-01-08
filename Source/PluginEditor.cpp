@@ -20,14 +20,18 @@ CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (Compress
     //trying to work out tabs
     
     setSize (800, 400);
+    
+    //set overriden lookandfeel
     setLookAndFeel(&otherLookAndFeel);
     
+    //add tab1 and tab2
     tabs.setSize(getWidth(), getHeight());
     tabs.addTab("myTab", juce::Colours::ghostwhite, &tab1, false);
     tabs.addTab("myTab2", juce::Colours::ghostwhite, &tab2, false);
     tabs.setTabBarDepth(20);
     addAndMakeVisible(tabs);
     
+    //set up ffmeter
     lnf = new FFAU::LevelMeterLookAndFeel();
     // adjust the colours to how you like them, e.g.
     lnf->setColour (FFAU::LevelMeter::lmMeterGradientLowColour, juce::Colours::green);
