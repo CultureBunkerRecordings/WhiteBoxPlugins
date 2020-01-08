@@ -76,15 +76,15 @@ private:
     TextButton whiteBox;
     TextButton help; 
     
-    String inputMessage = "Input";
-    String outputMessage = "Output";
-    String mixMessage = "Mix";
-    String threshMessage = "Threshold";
-    String ratioMessage = "Ratio";
-    String attackMessage = "attack";
-    String kneeMessage = "Knee";
-    String releaseMessage = "Release";
-    String hpfMessage = "High Pass Filter";
+    String inputMessage = "This controlls the level of input to the compressor";
+    String outputMessage = "This controls the level of the compressors output";
+    String mixMessage = "This controls how much of the compressed signal acts on the output";
+    String threshMessage = "This control dictates the level at which the compressor starts to act on the signal";
+    String ratioMessage = "The ratio at which compression occurs, ie. with a ratio of 2/1; for every dB over the threshold there is a reduction of 2dB";
+    String attackMessage = "This controls how soon the compressor starts acting on the signal";
+    String kneeMessage = "This controls the transission from no compression to comression at the threshold, a high value gives a smoother transition (soft knee)";
+    String releaseMessage = "This controls how soon the compressor stops acting on the signal";
+    String hpfMessage = "This applies a side chained high pass filter to the compressed signal, which allows frequencies above the cut-off frequency to be unaffected by the compression";
     
     BubbleMessageComponent inputHelp;
     BubbleMessageComponent outputHelp;
