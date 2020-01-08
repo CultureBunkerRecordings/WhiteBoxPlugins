@@ -8,4 +8,4 @@ git submodule init
 
 git submodule update
 
-'Add as a module from a specified folder' in prodjucer.
+Add /ffmeter 'as a module from a specified folder' in prodjucer.
