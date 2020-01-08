@@ -13,11 +13,12 @@
 
 //==============================================================================
 CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (CompressorTarrAudioProcessor& p)
-: AudioProcessorEditor (&p), processor (p), tab1(p), tabs(TabbedButtonBar::Orientation::TabsAtTop)
+: /*C(p),*/ AudioProcessorEditor (&p), processor (p), tab1(p), tab2(p), tabs(TabbedButtonBar::Orientation::TabsAtTop)
 { 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
     //trying to work out tabs
+    
     setSize (800, 400);
     setLookAndFeel(&otherLookAndFeel);
     
@@ -26,6 +27,17 @@ CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (Compress
     tabs.addTab("myTab2", juce::Colours::ghostwhite, &tab2, false);
     tabs.setTabBarDepth(20);
     addAndMakeVisible(tabs);
+    
+    lnf = new FFAU::LevelMeterLookAndFeel();
+    // adjust the colours to how you like them, e.g.
+    lnf->setColour (FFAU::LevelMeter::lmMeterGradientLowColour, juce::Colours::green);
+    lnf->setColour(FFAU::LevelMeter::lmOutlineColour, juce::Colours::lightgrey);
+    meter = new FFAU::LevelMeter(); // See FFAU::LevelMeter::MeterFlags for options
+    meter->setLookAndFeel (lnf);
+    meter->setMeterSource (&processor.getMeterSource());
+    meter->setBounds(745, 50, 30, getHeight()-75);
+    addAndMakeVisible (meter);
+    
 }
 
 CompressorTarrAudioProcessorEditor::~CompressorTarrAudioProcessorEditor()

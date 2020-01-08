@@ -14,8 +14,8 @@
 #include "PluginProcessor.h"
 #include "dial.h"
 #include "Tab1.h"
-#include "TransferFunction.h"
 #include "Tab2.h"
+#include "TransferFunction.h"
 //==============================================================================
 /**
 */
@@ -105,9 +105,11 @@ public:
     void resized() override;
     
 private:
-    OtherLookAndFeel otherLookAndFeel;  
+    ScopedPointer<FFAU::LevelMeterLookAndFeel> lnf;
+    ScopedPointer<FFAU::LevelMeter> meter;
     
-
+    OtherLookAndFeel otherLookAndFeel;
+    
     Tab1 tab1;
     Tab2 tab2;
     TabbedComponent tabs;
