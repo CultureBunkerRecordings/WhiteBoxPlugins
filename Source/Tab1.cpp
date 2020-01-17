@@ -12,7 +12,7 @@
 #include "Tab1.h"
 
 //==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p)
+Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), trans(p)
 {
     //*******************************************************************************
     //start loop for timerCallBack() at 60Hz
@@ -110,6 +110,7 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     whiteBox.setButtonText("White Box");
     addAndMakeVisible(whiteBox);
     
+    help.addListener(this);
     help.setBounds(700, 160, 20, 20);
     help.setButtonText("?");
     addAndMakeVisible(help);
@@ -168,58 +169,61 @@ void Tab1::timerCallback()
     //*******************************************************************************
     // map values from sliders and passes values to TransferFunction at regular intervals dictated by Timer
     
-    trans.xAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
-    trans.yAxisRatio = getRatioValue();
-    trans.xKnee = jmap<float>(getKneeValue(), 0, 10, 0.0f, 1.0f);
-    trans.xAxisInput = jmap<float>(getInputValue(),-48.0f, 12.0f, 400, 0);
+    trans.xAxisThresh = jmap<float>(threshSlider.getValue(), -64.0f, 0.0f, 0.0f, 1.0f);
+    trans.yAxisRatio = ratioSlider.getValue();
+    trans.xKnee = jmap<float>(kneeSlider.getValue(), 0, 10, 0.0f, 1.0f);
+    trans.xAxisInput = jmap<float>(inputSlider.getValue(),-48.0f, 12.0f, 400, 0);
     
     //*******************************************************************************
     // show BubbleMessage if component is clicked
     
-    if (inputSlider.isMouseButtonDown()){
-        inputHelp.showAt(&inputSlider,AttributedString(inputMessage), 1000);
-        addAndMakeVisible(inputHelp);
-    };
+    if(isClicked == true){
     
-    if (outputSlider.isMouseButtonDown()){
-        outputHelp.showAt(&outputSlider,AttributedString(outputMessage), 1000);
-        addAndMakeVisible(outputHelp);
-    };
-    
-    if (mixSlider.isMouseButtonDown()){
-        mixHelp.showAt(&mixSlider,AttributedString(mixMessage), 1000);
-        addAndMakeVisible(mixHelp);
-    };
-    
-    if (threshSlider.isMouseButtonDown()){
-        threshHelp.showAt(&threshSlider,AttributedString(threshMessage), 1000);
-        addAndMakeVisible(threshHelp);
-    };
-    
-    if (ratioSlider.isMouseButtonDown()){
-        ratioHelp.showAt(&ratioSlider,AttributedString(ratioMessage), 1000);
-        addAndMakeVisible(ratioHelp);
-    };
-    
-    if (attackSlider.isMouseButtonDown()){
-        attackHelp.showAt(&attackSlider,AttributedString(attackMessage), 1000);
-        addAndMakeVisible(attackHelp);
-    };
-    
-    if (kneeSlider.isMouseButtonDown()){
-        kneeHelp.showAt(&kneeSlider,AttributedString(kneeMessage), 1000);
-        addAndMakeVisible(kneeHelp);
-    };
-    
-    if (releaseSlider.isMouseButtonDown()){
-        releaseHelp.showAt(&releaseSlider,AttributedString(releaseMessage), 1000);
-        addAndMakeVisible(releaseHelp);
-    };
-    
-    if (hpfSlider.isMouseButtonDown()){
-        hpfHelp.showAt(&hpfSlider,AttributedString(hpfMessage), 1000);
-        addAndMakeVisible(hpfHelp);
-    };
+        if (inputSlider.isMouseButtonDown()){
+            inputHelp.showAt(&inputSlider,AttributedString(inputMessage), 1000);
+            addAndMakeVisible(inputHelp);
+        };
+        
+        if (outputSlider.isMouseButtonDown()){
+            outputHelp.showAt(&outputSlider,AttributedString(outputMessage), 1000);
+            addAndMakeVisible(outputHelp);
+        };
+        
+        if (mixSlider.isMouseButtonDown()){
+            mixHelp.showAt(&mixSlider,AttributedString(mixMessage), 1000);
+            addAndMakeVisible(mixHelp);
+        };
+        
+        if (threshSlider.isMouseButtonDown()){
+            threshHelp.showAt(&threshSlider,AttributedString(threshMessage), 1000);
+            addAndMakeVisible(threshHelp);
+        };
+        
+        if (ratioSlider.isMouseButtonDown()){
+            ratioHelp.showAt(&ratioSlider,AttributedString(ratioMessage), 1000);
+            addAndMakeVisible(ratioHelp);
+        };
+        
+        if (attackSlider.isMouseButtonDown()){
+            attackHelp.showAt(&attackSlider,AttributedString(attackMessage), 1000);
+            addAndMakeVisible(attackHelp);
+        };
+        
+        if (kneeSlider.isMouseButtonDown()){
+            kneeHelp.showAt(&kneeSlider,AttributedString(kneeMessage), 1000);
+            addAndMakeVisible(kneeHelp);
+        };
+        
+        if (releaseSlider.isMouseButtonDown()){
+            releaseHelp.showAt(&releaseSlider,AttributedString(releaseMessage), 1000);
+            addAndMakeVisible(releaseHelp);
+        };
+        
+        if (hpfSlider.isMouseButtonDown()){
+            hpfHelp.showAt(&hpfSlider,AttributedString(hpfMessage), 1000);
+            addAndMakeVisible(hpfHelp);
+        };
+    }
     //*******************************************************************************
     //repaint canvas at each iteration
     
@@ -230,6 +234,12 @@ void Tab1::timerCallback()
 //nothing happening yet
 void Tab1::buttonClicked (Button* button) // [2]
 {
+    if(button == &help && isClicked == false){
+        isClicked = true;
+    }
+    else if (button == &help && isClicked == true){
+        isClicked = false;
+    }
 };
 
 //*******************************************************************************

@@ -32,7 +32,7 @@ public:
     float xComp;
     float yComp;
 
-    int count;
+
     CompressorTarrAudioProcessor& processor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransferFunction)
 };

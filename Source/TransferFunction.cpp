@@ -11,7 +11,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "TransferFunction.h"
 //==============================================================================
-TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p): processor(p), xAxisThresh(0.5), yAxisRatio(2), xKnee(0.1), xAxisInput(0), count(0), xComp(0), yComp(0)
+TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p): processor(p), xAxisThresh(1), yAxisRatio(1), xKnee(0), xAxisInput(0), xComp(0), yComp(0)  
 {
      //In your constructor, you should add any child components, and
     //initialise any special settings that your component needs.
@@ -25,6 +25,8 @@ TransferFunction::~TransferFunction()
 
 void TransferFunction::paint(Graphics& g)
 {
+    
+    
     //*******************************************************************************
     //background colour
     g.fillAll (juce::Colours::grey);

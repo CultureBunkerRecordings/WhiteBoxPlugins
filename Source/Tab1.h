@@ -34,41 +34,15 @@ public:
     void paintMixDialBackground(Graphics& g);
     void sliderValueChanged(Slider* slider) override;
     void buttonClicked (Button* button) override; // [2]
-    
-    //*******************************************************************************
-    // each of thesee getters return values from the sliders, they are called in timerCallBack()
-    
-    float getKneeValue(){
-        knee = kneeSlider.getValue();
-        return knee;
-    }
-    
-    float getAxisThresh(){
-        thresh = threshSlider.getValue();
-        return thresh;
-    };
-    
-    float getRatioValue(){
-        ratio = ratioSlider.getValue();
-        return ratio;
-    }
-    
-    float getInputValue(){
-        input = inputSlider.getValue(); 
-        return input;
-    }
-    
+
+
     void timerCallback() override; // loop, see constructor
     
     //*******************************************************************************
     //member variables
-private:
+    
     TransferFunction trans;
-    int count;
-    float thresh;
-    float ratio;
-    float knee;
-    float input;
+private:
  
     Slider inputSlider;
     Slider outputSlider;
@@ -81,7 +55,8 @@ private:
     Slider hpfSlider;
     
     TextButton whiteBox;
-    TextButton help; 
+    TextButton help;
+    bool isClicked = false;
     
     //*******************************************************************************
     //initialise BubbleMessageComponents for help

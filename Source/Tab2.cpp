@@ -12,11 +12,8 @@
 #include "Tab2.h"
 
 //==============================================================================
-Tab2::Tab2(CompressorTarrAudioProcessor& p): processor(p), trans(p)
+Tab2::Tab2(CompressorTarrAudioProcessor& p): processor(p), trans(p), tab1(p)
 {
-    // In your constructor, you should add any child components, and
-    // initialise any special settings that your component needs.
- 
     addAndMakeVisible(trans);
     
     abs.setColour(TextButton::textColourOffId, juce::Colours::black);
@@ -44,6 +41,15 @@ Tab2::Tab2(CompressorTarrAudioProcessor& p): processor(p), trans(p)
     lin.setBounds(625, 250, 50, 50);
     addAndMakeVisible(lin);
     
+    T.addListener(this);
+    T.setColour(Slider::textBoxTextColourId, juce::Colours::black);
+    T.setBounds(225, 325, 25, 25);
+    T.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    T.setRange(-64.0f, 0.0f);
+    T.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    T.setNumDecimalPlacesToDisplay(1);
+    addAndMakeVisible(T);
+    
 }
 
 Tab2::~Tab2()
@@ -52,13 +58,6 @@ Tab2::~Tab2()
 
 void Tab2::paint (Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
     g.fillAll (Colours::whitesmoke);   // clear the background
 
     g.setColour (Colours::black);
@@ -89,3 +88,9 @@ void Tab2::resized()
     // components that your component contains..
 
 }
+
+void Tab2::sliderValueChanged(Slider* slider)
+{
+    
+}
+
