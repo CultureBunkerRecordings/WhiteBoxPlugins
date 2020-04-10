@@ -11,20 +11,21 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "TransferFunction.h"
 //==============================================================================
-TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p): processor(p), xAxisThresh(1), yAxisRatio(1), xKnee(0), xAxisInput(0), xComp(0), yComp(0)  
+TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p): processor(p), xComp(0), yComp(0), xAxisThresh(1), yAxisRatio(1), xKnee(0), xAxisInput(0), paintOutX(0), paintOutY(0)
 {
      //In your constructor, you should add any child components, and
     //initialise any special settings that your component needs.
     setBounds(200, 25, 400, 150);
+    
 }
 
 TransferFunction::~TransferFunction()
 {
 }
 
-
 void TransferFunction::paint(Graphics& g)
 {
+    
     
     
     //*******************************************************************************
@@ -62,6 +63,7 @@ void TransferFunction::paint(Graphics& g)
     //*******************************************************************************
     //path to draw grid from
     Path p2;
+    Path p3;
     
     float gridY = 18.75; //height/8
     float gridX = 50;//width/8
@@ -76,6 +78,8 @@ void TransferFunction::paint(Graphics& g)
         }
     };
     
+    
+    
     //*******************************************************************************
     //set colour and fill paths
     
@@ -85,6 +89,17 @@ void TransferFunction::paint(Graphics& g)
     g.setColour (Colours::white);
     g.strokePath(p, PathStrokeType(2));
     
+    for (int i = 0; i<getHeight(); i++){
+        p3.startNewSubPath(0, getHeight());
+        paintOutY = jmap<float>(processor.paintOut, getHeight(), 0);
+        paintOutX = jmap<float>(processor.paintOut, 0, getWidth());
+        
+        p3.lineTo(paintOutX, paintOutY);
+        g.setColour(Colours::red);
+        g.strokePath(p3, PathStrokeType(3));
+        
+    };
+    
 }
 
 void TransferFunction::resized()
@@ -93,3 +108,6 @@ void TransferFunction::resized()
     // components that your component contains..
 
 }
+
+
+

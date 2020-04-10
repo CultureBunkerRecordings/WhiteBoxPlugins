@@ -114,9 +114,6 @@ public:
     //*******************************************************************************
     //member variables
 private:
-    //look and feel for third party ffmeter
-    ScopedPointer<FFAU::LevelMeterLookAndFeel> lnf;
-    ScopedPointer<FFAU::LevelMeter> meter;
     //instance of OtherlookAndFeel
     OtherLookAndFeel otherLookAndFeel;
     

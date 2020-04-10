@@ -31,16 +31,6 @@ CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (Compress
     tabs.setTabBarDepth(20);
     addAndMakeVisible(tabs);
     
-    //set up ffmeter
-    lnf = new FFAU::LevelMeterLookAndFeel();
-    // adjust the colours to how you like them, e.g.
-    lnf->setColour (FFAU::LevelMeter::lmMeterGradientLowColour, juce::Colours::green);
-    lnf->setColour(FFAU::LevelMeter::lmOutlineColour, juce::Colours::lightgrey);
-    meter = new FFAU::LevelMeter(); // See FFAU::LevelMeter::MeterFlags for options
-    meter->setLookAndFeel (lnf);
-    meter->setMeterSource (&processor.getMeterSource());
-    meter->setBounds(745, 50, 30, getHeight()-75);
-    addAndMakeVisible (meter);
     
 }
 

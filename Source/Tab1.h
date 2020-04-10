@@ -34,8 +34,7 @@ public:
     void paintMixDialBackground(Graphics& g);
     void sliderValueChanged(Slider* slider) override;
     void buttonClicked (Button* button) override; // [2]
-
-
+    
     void timerCallback() override; // loop, see constructor
     
     //*******************************************************************************
@@ -43,6 +42,11 @@ public:
     
     TransferFunction trans;
 private:
+    int count;
+    float thresh;
+    float ratio;
+    float knee;
+    float input;
  
     Slider inputSlider;
     Slider outputSlider;
@@ -55,7 +59,9 @@ private:
     Slider hpfSlider;
     
     TextButton whiteBox;
-    TextButton help;
+    ToggleButton help;
+    ToggleButton phaseInvert;
+
     bool isClicked = false;
     
     //*******************************************************************************

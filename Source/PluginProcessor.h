@@ -52,25 +52,27 @@ public:
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
-    FFAU::LevelMeterSource& getMeterSource()
-    {
-        return meterSource;
-    }
+    void phaseSwitched();
+
     
-    float T = -24.0;
-    float R = 4.0;
-    float attack = 100; //milli sec
-    float release = 500;// milli secs
-    float inputGain = 0.0;
-    float outputGain = 0.0;
-    float mix = 0.1;
-    float knee = 0.0;
+    AudioParameterFloat* T;
+    AudioParameterFloat* R;
+    AudioParameterFloat* attack; //milli sec
+    AudioParameterFloat* release;// milli secs
+    AudioParameterFloat* inputGain;
+    AudioParameterFloat* outputGain;
+    AudioParameterFloat* mix;
+    AudioParameterFloat* knee;
+    
+    int phase = 1;
+    float paintOut = 0.0f;
 
     
 private:
-    FFAU::LevelMeterSource meterSource; 
     float prevGainChange = 0.0;
     float Fs = 48000;
+    
+
     
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (CompressorTarrAudioProcessor)

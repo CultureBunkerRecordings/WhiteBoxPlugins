@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
+
 //==============================================================================
 /*
 */
@@ -29,8 +30,14 @@ public:
     float xAxisInput;
     float yAxisRatio;
     
-    float xComp;
+    float xComp; 
     float yComp;
+
+    float paintOutX;
+    float paintOutY;
+    
+    
+    
 
 
     CompressorTarrAudioProcessor& processor;

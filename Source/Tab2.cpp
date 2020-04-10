@@ -45,7 +45,7 @@ Tab2::Tab2(CompressorTarrAudioProcessor& p): processor(p), trans(p), tab1(p)
     T.setColour(Slider::textBoxTextColourId, juce::Colours::black);
     T.setBounds(225, 325, 25, 25);
     T.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    T.setRange(-64.0f, 0.0f);
+    T.setRange(-64.0f, 0.0f); 
     T.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
     T.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(T);

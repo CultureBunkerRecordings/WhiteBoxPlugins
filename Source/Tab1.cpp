@@ -12,7 +12,7 @@
 #include "Tab1.h"
 
 //==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), trans(p)
+Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p) 
 {
     //*******************************************************************************
     //start loop for timerCallBack() at 60Hz
@@ -106,14 +106,27 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), trans(p)
     //setup buttons
     
     whiteBox.addListener(this);
-    whiteBox.setBounds(25, 160, 100, 20);
+    whiteBox.setBounds(25, 20, 100, 20);
     whiteBox.setButtonText("White Box");
     addAndMakeVisible(whiteBox);
     
     help.addListener(this);
-    help.setBounds(700, 160, 20, 20);
-    help.setButtonText("?");
+    help.setBounds(650, 20, 100, 20);
+    help.setButtonText("Help");
+    help.setColour(ToggleButton::tickDisabledColourId, Colours::black);
+    help.setColour(ToggleButton::tickColourId, Colours::black);
+    help.setColour(ToggleButton::textColourId, Colours::black);
     addAndMakeVisible(help);
+    
+    phaseInvert.addListener(this);
+    phaseInvert.setBounds(650, 60, 100, 20);
+    phaseInvert.setButtonText("Phase");
+    phaseInvert.setColour(ToggleButton::tickColourId, Colours::black);
+    phaseInvert.setColour(ToggleButton::tickDisabledColourId, Colours::black);
+    phaseInvert.setColour(ToggleButton::textColourId, Colours::black);
+    addAndMakeVisible(phaseInvert);
+
+
     
     //make TransferFuncction visible
     addAndMakeVisible(&trans);
@@ -156,6 +169,10 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), trans(p)
     hpfSlider.addMouseListener(&click, false);
     hpfHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     hpfHelp.setPosition(&hpfSlider);
+    
+    
+    
+    
 
 }
 
@@ -172,7 +189,7 @@ void Tab1::timerCallback()
     trans.xAxisThresh = jmap<float>(threshSlider.getValue(), -64.0f, 0.0f, 0.0f, 1.0f);
     trans.yAxisRatio = ratioSlider.getValue();
     trans.xKnee = jmap<float>(kneeSlider.getValue(), 0, 10, 0.0f, 1.0f);
-    trans.xAxisInput = jmap<float>(inputSlider.getValue(),-48.0f, 12.0f, 400, 0);
+    trans.xAxisInput = jmap<float>(inputSlider.getValue(),-48.0f, 12.0f, 400, 0); 
     
     //*******************************************************************************
     // show BubbleMessage if component is clicked
@@ -240,6 +257,11 @@ void Tab1::buttonClicked (Button* button) // [2]
     else if (button == &help && isClicked == true){
         isClicked = false;
     }
+    
+    if(button == &phaseInvert)
+    {
+        processor.phaseSwitched();
+    }
 };
 
 //*******************************************************************************
@@ -249,38 +271,38 @@ void Tab1::sliderValueChanged(Slider* slider)
 {
     if (slider == &inputSlider)
     {
-        processor.inputGain = slider->getValue();
+        *processor.inputGain = slider->getValue();
     }
     if (slider == &outputSlider)
     {
-        processor.outputGain = slider->getValue();
+        *processor.outputGain = slider->getValue();
     }
     if (slider == &mixSlider)
     {
-        processor.mix = slider->getValue();
+        *processor.mix = slider->getValue();
     }
     if (slider == &kneeSlider)
     {
-        processor.knee = slider->getValue();
+        *processor.knee = slider->getValue();
     }
     if (slider == &threshSlider)
     {
-        processor.T = slider->getValue();
+        *processor.T = slider->getValue();
     }
     
     if (slider == &ratioSlider)
     {
-        processor.R = slider->getValue();
+        *processor.R = slider->getValue();
     }
     
     if (slider == &attackSlider)
     {
-        processor.attack = slider->getValue();
+        *processor.attack = slider->getValue();
     }
     
     if (slider == &releaseSlider)
     {
-        processor.release = slider->getValue();
+        *processor.release = slider->getValue();
     }
 };
 

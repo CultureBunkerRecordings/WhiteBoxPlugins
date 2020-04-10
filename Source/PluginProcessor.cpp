@@ -24,6 +24,14 @@ CompressorTarrAudioProcessor::CompressorTarrAudioProcessor()
                        )
 #endif
 {
+    addParameter(T = new AudioParameterFloat("T", "Threshold", -64.0f, 0.0f, 0.0f));
+    addParameter(R = new AudioParameterFloat("R", "Ratio", 1.0f, 10.0f, 1.0f));
+    addParameter(attack = new AudioParameterFloat("attack", "Attack", 0.0f, 1500.0f, 500.0f));
+    addParameter(release = new AudioParameterFloat("release", "Release", 0.0f, 3000.0f, 500.0f));
+    addParameter(inputGain = new AudioParameterFloat("inputGain", "Input Gain", -48.0f, 12.0f, 0.0f));
+    addParameter(outputGain = new AudioParameterFloat("outputGain", "Output Gain", -48.0, 12.0f, 0.0f));
+    addParameter(mix = new AudioParameterFloat("mix", "Mix", 0.0f, 100.0f, 0.0f));
+    addParameter(knee = new AudioParameterFloat("knee", "Knee", 0.0f, 10.0f, 0.0f));
 }
 
 CompressorTarrAudioProcessor::~CompressorTarrAudioProcessor()
@@ -147,8 +155,8 @@ void CompressorTarrAudioProcessor::processBlock (AudioBuffer<float>& buffer, Mid
     for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
         buffer.clear (i, 0, buffer.getNumSamples());
 
-    float alphaA = exp(-logf(9.0)/(Fs * attack * 0.0001));
-    float alphaR = exp(-logf(9.0)/(Fs * release * 0.0001));
+    float alphaA = exp(-logf(9.0)/(Fs * (*attack) * 0.0001));
+    float alphaR = exp(-logf(9.0)/(Fs * (*release) * 0.0001));
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     // Make sure to reset the state if your inner loop is processing
@@ -158,70 +166,74 @@ void CompressorTarrAudioProcessor::processBlock (AudioBuffer<float>& buffer, Mid
     for (int sample = 0; sample<buffer.getNumSamples();++sample)
     {
     
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
-    {
-        
-        float linIn = powf(10.0f, inputGain/20.0f);
-        
-        float x = buffer.getWritePointer (channel)[sample] * linIn;
-        
-        meterSource.measureBlock(buffer);
-        
-        //this is where compressor goes
-        float x_Pos = fabs(x);
-        float x_dB = 20*log10(x_Pos);
-        
-        if (x_dB < -144.0f)
-        {
-            x_dB = -144.0f;
+        for (int channel = 0; channel < totalNumInputChannels; ++channel){
             
-        }
-        // x_dB = jmax(-144.0f, x_dB);      juce way
-        
-        float xSC = 0;
-        
-        if (2*(x_dB - T) < -knee)
-        {
-            //no comp
-            xSC = x_dB;
-        }
-        else if (2* abs(x_dB - T)<= knee)
-        {
-            //yes comp
-            xSC = x_dB+(1/R - 1)*std::pow(x_dB - T+knee/2, 2)/(2*knee);
-        }
-        else{
-            xSC = T+(x_dB - T)/R;
-        }
-            //compare
-        float gainChange = xSC - x_dB;
-        float gainChangeSmooth;
-            //smooth
-        if (gainChange < prevGainChange){
-                //attack
-                gainChangeSmooth = (1- alphaA) * gainChange + alphaA * prevGainChange;
-
-            }
-        else{
-                //release
-                gainChangeSmooth = (1- alphaR) * gainChange + alphaR * prevGainChange;
-
+            float linIn = powf(10.0f, (*inputGain)/20.0f);
+            
+            float x = buffer.getWritePointer (channel)[sample] * linIn;
+            
+//            meterSource.measureBlock(buffer);
+            
+            //this is where compressor goes
+            float x_Pos = fabs(x);
+            float x_dB = 20*log10(x_Pos);
+            
+            if (x_dB < -144.0f)
+            {
+                x_dB = -144.0f;
                 
             }
+            // x_dB = jmax(-144.0f, x_dB);      juce way
             
-        float gLin = powf(10.0f, gainChangeSmooth/20.0f);
+            float xSC = 0;
             
-        prevGainChange = gainChangeSmooth;
-        
-        float linOut = powf(10.0f, outputGain/20.0f);
-        
-        float output = (gLin * x) * linOut;
-        
-        float mixer = mix/100;
+            if (2*(x_dB - *T) < -*knee)
+            {
+                //no comp
+                xSC = x_dB;
+            }
+            else if (2* abs(x_dB - *T)<= *knee)
+            {
+                //yes comp
+                xSC = x_dB+(1/(*R) - 1)*std::pow(x_dB - (*T)+(*knee)/2, 2)/(2 * (*knee));
+            }
+            else{
+                xSC = *T+(x_dB - *T)/(*R);
+            }
+                //compare
+            float gainChange = xSC - x_dB;
+            float gainChangeSmooth;
+                //smooth
+            if (gainChange < prevGainChange){
+                    //attack
+                    gainChangeSmooth = (1- alphaA) * gainChange + alphaA * prevGainChange;
+
+                }
+            else{
+                    //release
+                    gainChangeSmooth = (1- alphaR) * gainChange + alphaR * prevGainChange;
+
+                
+                }
             
-        buffer.getWritePointer(channel)[sample] = mixer*output + (1-mixer)*x;
-        
-    }// ..do something to the data...
+            float gLin = powf(10.0f, gainChangeSmooth/20.0f);
+            
+            prevGainChange = gainChangeSmooth;
+            
+            float linOut = powf(10.0f, (*outputGain)/20.0f);
+            
+            float output = (gLin * x) * linOut;
+            
+            float mixer = (*mix)/100;
+            
+            buffer.getWritePointer(channel)[sample] = phase * mixer*output + (1-mixer)*x;
+            
+            if(sample % 100 == 0)
+            {
+                paintOut = output;
+            }
+            
+        }// ..do something to the data...
     }
 }
 
@@ -248,6 +260,11 @@ void CompressorTarrAudioProcessor::setStateInformation (const void* data, int si
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+}
+
+void CompressorTarrAudioProcessor::phaseSwitched()
+{
+    phase *= -1;
 }
 
 //==============================================================================
