@@ -102,6 +102,7 @@ public:
 // CompressorTarrAudioProcessorEditor class
 
 class CompressorTarrAudioProcessorEditor  : public AudioProcessorEditor
+
 {
 public:
     CompressorTarrAudioProcessorEditor (CompressorTarrAudioProcessor&);
@@ -110,7 +111,6 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
-    
     //*******************************************************************************
     //member variables
 private:

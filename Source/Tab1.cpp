@@ -12,7 +12,7 @@
 #include "Tab1.h"
 
 //==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p) 
+Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), ratio(0), knee(0), input(0), processor(p)
 {
     //*******************************************************************************
     //start loop for timerCallBack() at 60Hz
@@ -183,6 +183,15 @@ Tab1::~Tab1()
 //*******************************************************************************
 void Tab1::timerCallback()
 {
+    
+    inputSlider.setValue(*processor.inputGain);
+    outputSlider.setValue(*processor.outputGain);
+    mixSlider.setValue(*processor.mix);
+    threshSlider.setValue(*processor.T);
+    ratioSlider.setValue(*processor.R);
+    kneeSlider.setValue(*processor.knee);
+    attackSlider.setValue(*processor.attack);
+    releaseSlider.setValue(*processor.release);
     //*******************************************************************************
     // map values from sliders and passes values to TransferFunction at regular intervals dictated by Timer
     
