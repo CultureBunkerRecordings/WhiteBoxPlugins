@@ -254,12 +254,38 @@ void CompressorTarrAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+    
+    ScopedPointer<XmlElement> xml(new XmlElement("Params"));
+    xml->setAttribute("T", static_cast<double>(*T));
+    xml->setAttribute("R", static_cast<double>(*R));
+    xml->setAttribute("attack", static_cast<double>(*attack));
+    xml->setAttribute("release", static_cast<double>(*release));
+    xml->setAttribute("inputGain", static_cast<double>(*inputGain));
+    xml->setAttribute("outputGain", static_cast<double>(*outputGain));
+    xml->setAttribute("mix", static_cast<double>(*mix));
+    xml->setAttribute("knee", static_cast<double>(*knee));
+    copyXmlToBinary(*xml, destData);
 }
 
 void CompressorTarrAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+    
+    std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+    if(xmlState != nullptr){
+        if(xmlState->hasTagName("Params")){
+            *T = xmlState->getDoubleAttribute("T", 0.0);
+            *R = xmlState->getDoubleAttribute("R", 1.0);
+            *attack = xmlState->getDoubleAttribute("attack", 0.0);
+            *release = xmlState->getDoubleAttribute("release", 0.0);
+            *inputGain = xmlState->getDoubleAttribute("inputGain", 0.0);
+            *outputGain = xmlState->getDoubleAttribute("outputGain", 0.0);
+            *mix = xmlState->getDoubleAttribute("mix", 0.0);
+            *knee = xmlState->getDoubleAttribute("knee", 0.0);
+        }
+    }
+    
 }
 
 void CompressorTarrAudioProcessor::phaseSwitched()

@@ -183,7 +183,8 @@ Tab1::~Tab1()
 //*******************************************************************************
 void Tab1::timerCallback()
 {
-    
+    //****************************************************************************
+    //automation for sliders
     inputSlider.setValue(*processor.inputGain);
     outputSlider.setValue(*processor.outputGain);
     mixSlider.setValue(*processor.mix);
@@ -192,6 +193,7 @@ void Tab1::timerCallback()
     kneeSlider.setValue(*processor.knee);
     attackSlider.setValue(*processor.attack);
     releaseSlider.setValue(*processor.release);
+    
     //*******************************************************************************
     // map values from sliders and passes values to TransferFunction at regular intervals dictated by Timer
     
