@@ -13,7 +13,7 @@
 
 //==============================================================================
 CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (CompressorTarrAudioProcessor& p)
-: /*C(p),*/ AudioProcessorEditor (&p), processor (p), tab1(p), tab2(p), tabs(TabbedButtonBar::Orientation::TabsAtTop) 
+: /*C(p),*/ AudioProcessorEditor (&p), tabs(TabbedButtonBar::Orientation::TabsAtTop), tab1(p), tab2(p), processor(p)
 { 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
@@ -30,8 +30,6 @@ CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (Compress
     tabs.addTab("myTab2", juce::Colours::ghostwhite, &tab2, false);
     tabs.setTabBarDepth(20);
     addAndMakeVisible(tabs);
-    
-    
 }
 
 CompressorTarrAudioProcessorEditor::~CompressorTarrAudioProcessorEditor()

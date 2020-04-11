@@ -12,7 +12,7 @@
 #include "Tab2.h"
 
 //==============================================================================
-Tab2::Tab2(CompressorTarrAudioProcessor& p): processor(p), trans(p), tab1(p)
+Tab2::Tab2(CompressorTarrAudioProcessor& p): tab1(p), trans(p), processor(p)
 { 
     addAndMakeVisible(trans);
     

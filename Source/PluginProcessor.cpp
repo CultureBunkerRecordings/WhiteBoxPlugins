@@ -255,7 +255,7 @@ void CompressorTarrAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
     
-    ScopedPointer<XmlElement> xml(new XmlElement("Params"));
+    std::unique_ptr<XmlElement> xml(new XmlElement("Params"));
     xml->setAttribute("T", static_cast<double>(*T));
     xml->setAttribute("R", static_cast<double>(*R));
     xml->setAttribute("attack", static_cast<double>(*attack));
