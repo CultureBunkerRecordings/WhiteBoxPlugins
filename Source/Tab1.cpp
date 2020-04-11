@@ -13,7 +13,7 @@
 
 //==============================================================================
 Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), ratio(0), knee(0), input(0), processor(p)
-{
+{ 
     //*******************************************************************************
     //start loop for timerCallBack() at 60Hz
     Timer::startTimerHz(60);

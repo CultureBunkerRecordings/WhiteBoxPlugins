@@ -13,7 +13,7 @@
 
 //==============================================================================
 Tab2::Tab2(CompressorTarrAudioProcessor& p): processor(p), trans(p), tab1(p)
-{
+{ 
     addAndMakeVisible(trans);
     
     abs.setColour(TextButton::textColourOffId, juce::Colours::black);
