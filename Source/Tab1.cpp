@@ -12,9 +12,14 @@
 #include "Tab1.h"
 
 //==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), input(0), knee(0), count(0), trans(p)
-{
+Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), ratio(0), knee(0), input(0), processor(p)
+{ 
+    //*******************************************************************************
+    //start loop for timerCallBack() at 60Hz
     Timer::startTimerHz(60);
+    
+    //*******************************************************************************
+    //setup sliders
     
     inputSlider.addListener(this);
     inputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
@@ -87,7 +92,7 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     releaseSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
     releaseSlider.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(releaseSlider);
-    //
+    
     hpfSlider.addListener(this);
     hpfSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
     hpfSlider.setBounds(550, 225, 75, 75);
@@ -97,16 +102,37 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     hpfSlider.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(hpfSlider);
     
+    //*******************************************************************************
+    //setup buttons
+    
     whiteBox.addListener(this);
-    whiteBox.setBounds(25, 160, 100, 20);
+    whiteBox.setBounds(25, 20, 100, 20);
     whiteBox.setButtonText("White Box");
     addAndMakeVisible(whiteBox);
     
-    help.setBounds(700, 160, 20, 20);
-    help.setButtonText("?");
+    help.addListener(this);
+    help.setBounds(650, 20, 100, 20);
+    help.setButtonText("Help");
+    help.setColour(ToggleButton::tickDisabledColourId, Colours::black);
+    help.setColour(ToggleButton::tickColourId, Colours::black);
+    help.setColour(ToggleButton::textColourId, Colours::black);
     addAndMakeVisible(help);
     
+    phaseInvert.addListener(this);
+    phaseInvert.setBounds(650, 60, 100, 20);
+    phaseInvert.setButtonText("Phase");
+    phaseInvert.setColour(ToggleButton::tickColourId, Colours::black);
+    phaseInvert.setColour(ToggleButton::tickDisabledColourId, Colours::black);
+    phaseInvert.setColour(ToggleButton::textColourId, Colours::black);
+    addAndMakeVisible(phaseInvert);
+
+
+    
+    //make TransferFuncction visible
     addAndMakeVisible(&trans);
+    
+    //*******************************************************************************
+    //setup BubbleMessageComponents and MouseListener
     
     inputSlider.addMouseListener(&click, false);
     inputHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
@@ -143,6 +169,10 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p): processor(p), thresh(0), ratio(0), 
     hpfSlider.addMouseListener(&click, false);
     hpfHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     hpfHelp.setPosition(&hpfSlider);
+    
+    
+    
+    
 
 }
 
@@ -150,109 +180,145 @@ Tab1::~Tab1()
 {
 };
 
+//*******************************************************************************
 void Tab1::timerCallback()
 {
-    trans.yAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
-    trans.xAxisThresh = jmap<float>(getAxisThresh(), -64.0f, 0.0f, 0.0f, 1.0f);
-    trans.yAxisRatio = getRatioValue();
-    trans.yKnee = jmap<float>(getKneeValue(), 0, 10, 1, 0);
-    trans.xKnee = jmap<float>(getKneeValue(), 0, 10, 0.0f, 1.0f);
-    trans.xAxisInput = jmap<float>(getInputValue(),-48.0f, 12.0f, 400, 0);
-    trans.yAxisInput = jmap<float>(getInputValue(), -48.0f, 12.0f, 150, 0);
-    trans.repaint();
+    //****************************************************************************
+    //automation for sliders
+    inputSlider.setValue(*processor.inputGain);
+    outputSlider.setValue(*processor.outputGain);
+    mixSlider.setValue(*processor.mix);
+    threshSlider.setValue(*processor.T);
+    ratioSlider.setValue(*processor.R);
+    kneeSlider.setValue(*processor.knee);
+    attackSlider.setValue(*processor.attack);
+    releaseSlider.setValue(*processor.release);
     
+    //*******************************************************************************
+    // map values from sliders and passes values to TransferFunction at regular intervals dictated by Timer
+    
+    trans.xAxisThresh = jmap<float>(threshSlider.getValue(), -64.0f, 0.0f, 0.0f, 1.0f);
+    trans.yAxisRatio = ratioSlider.getValue();
+    trans.xKnee = jmap<float>(kneeSlider.getValue(), 0, 10, 0.0f, 1.0f);
+    trans.xAxisInput = jmap<float>(inputSlider.getValue(),-48.0f, 12.0f, 400, 0); 
+    
+    //*******************************************************************************
+    // show BubbleMessage if component is clicked
+    
+    if(isClicked == true){
+    
+        if (inputSlider.isMouseButtonDown()){
+            inputHelp.showAt(&inputSlider,AttributedString(inputMessage), 1000);
+            addAndMakeVisible(inputHelp);
+        };
         
-    if (inputSlider.isMouseButtonDown()){
-        inputHelp.showAt(&inputSlider,AttributedString(inputMessage), 1000);
-        addAndMakeVisible(inputHelp);
-    };
+        if (outputSlider.isMouseButtonDown()){
+            outputHelp.showAt(&outputSlider,AttributedString(outputMessage), 1000);
+            addAndMakeVisible(outputHelp);
+        };
+        
+        if (mixSlider.isMouseButtonDown()){
+            mixHelp.showAt(&mixSlider,AttributedString(mixMessage), 1000);
+            addAndMakeVisible(mixHelp);
+        };
+        
+        if (threshSlider.isMouseButtonDown()){
+            threshHelp.showAt(&threshSlider,AttributedString(threshMessage), 1000);
+            addAndMakeVisible(threshHelp);
+        };
+        
+        if (ratioSlider.isMouseButtonDown()){
+            ratioHelp.showAt(&ratioSlider,AttributedString(ratioMessage), 1000);
+            addAndMakeVisible(ratioHelp);
+        };
+        
+        if (attackSlider.isMouseButtonDown()){
+            attackHelp.showAt(&attackSlider,AttributedString(attackMessage), 1000);
+            addAndMakeVisible(attackHelp);
+        };
+        
+        if (kneeSlider.isMouseButtonDown()){
+            kneeHelp.showAt(&kneeSlider,AttributedString(kneeMessage), 1000);
+            addAndMakeVisible(kneeHelp);
+        };
+        
+        if (releaseSlider.isMouseButtonDown()){
+            releaseHelp.showAt(&releaseSlider,AttributedString(releaseMessage), 1000);
+            addAndMakeVisible(releaseHelp);
+        };
+        
+        if (hpfSlider.isMouseButtonDown()){
+            hpfHelp.showAt(&hpfSlider,AttributedString(hpfMessage), 1000);
+            addAndMakeVisible(hpfHelp);
+        };
+    }
+    //*******************************************************************************
+    //repaint canvas at each iteration
     
-    if (outputSlider.isMouseButtonDown()){
-        outputHelp.showAt(&outputSlider,AttributedString(outputMessage), 1000);
-        addAndMakeVisible(outputHelp);
-    };
-    
-    if (mixSlider.isMouseButtonDown()){
-        mixHelp.showAt(&mixSlider,AttributedString(mixMessage), 1000);
-        addAndMakeVisible(mixHelp);
-    };
-    
-    if (threshSlider.isMouseButtonDown()){
-        threshHelp.showAt(&threshSlider,AttributedString(threshMessage), 1000);
-        addAndMakeVisible(threshHelp);
-    };
-    
-    if (ratioSlider.isMouseButtonDown()){
-        ratioHelp.showAt(&ratioSlider,AttributedString(ratioMessage), 1000);
-        addAndMakeVisible(ratioHelp);
-    };
-    
-    if (attackSlider.isMouseButtonDown()){
-        attackHelp.showAt(&attackSlider,AttributedString(attackMessage), 1000);
-        addAndMakeVisible(attackHelp);
-    };
-    
-    if (kneeSlider.isMouseButtonDown()){
-        kneeHelp.showAt(&kneeSlider,AttributedString(kneeMessage), 1000);
-        addAndMakeVisible(kneeHelp);
-    };
-    
-    if (releaseSlider.isMouseButtonDown()){
-        releaseHelp.showAt(&releaseSlider,AttributedString(releaseMessage), 1000);
-        addAndMakeVisible(releaseHelp);
-    };
-    
-    if (hpfSlider.isMouseButtonDown()){
-        hpfHelp.showAt(&hpfSlider,AttributedString(hpfMessage), 1000);
-        addAndMakeVisible(hpfHelp);
-    };
+    trans.repaint();
 };
-    
+
+//*******************************************************************************
+//nothing happening yet
 void Tab1::buttonClicked (Button* button) // [2]
-{ 
-    if (button == &whiteBox){
-    };
+{
+    if(button == &help && isClicked == false){
+        isClicked = true;
+    }
+    else if (button == &help && isClicked == true){
+        isClicked = false;
+    }
     
+    if(button == &phaseInvert)
+    {
+        processor.phaseSwitched();
+    }
 };
+
+//*******************************************************************************
+//primitive slider to processsor technique, need to utilise ValueTreeState
+
 void Tab1::sliderValueChanged(Slider* slider)
 {
     if (slider == &inputSlider)
     {
-        processor.inputGain = slider->getValue();
+        *processor.inputGain = slider->getValue();
     }
     if (slider == &outputSlider)
     {
-        processor.outputGain = slider->getValue();
+        *processor.outputGain = slider->getValue();
     }
     if (slider == &mixSlider)
     {
-        processor.mix = slider->getValue();
+        *processor.mix = slider->getValue();
     }
     if (slider == &kneeSlider)
     {
-        processor.knee = slider->getValue();
+        *processor.knee = slider->getValue();
     }
     if (slider == &threshSlider)
     {
-        processor.T = slider->getValue();
+        *processor.T = slider->getValue();
     }
     
     if (slider == &ratioSlider)
     {
-        processor.R = slider->getValue();
+        *processor.R = slider->getValue();
     }
     
     if (slider == &attackSlider)
     {
-        processor.attack = slider->getValue();
+        *processor.attack = slider->getValue();
     }
     
     if (slider == &releaseSlider)
     {
-        processor.release = slider->getValue();
+        *processor.release = slider->getValue();
     }
 };
 
+//*******************************************************************************
+// code for drawing mixdial background
 void Tab1::paintMixDialBackground(Graphics& g)
 {
     Path p1;
@@ -266,6 +332,9 @@ void Tab1::paintMixDialBackground(Graphics& g)
     g.fillPath(p2);
     
 };
+
+//*******************************************************************************
+// code for drawing other dial backgrounds
 
 void Tab1::paintDialBackground(Graphics& g, int x, int y, int width, int height)
 {
@@ -296,6 +365,7 @@ void Tab1::paint (Graphics& g)
     paintDialBackground(g, 25, 200, 100, 100);
     paintMixDialBackground(g);
     paintDialBackground(g, 625, 200, 100, 100);
+    
     g.setColour(Colours::black);
     g.drawFittedText("input", 25, 275, 100, 100, Justification::centred, 1);
     g.drawFittedText("Thresh", 112, 275, 100, 100, Justification::centred, 1);

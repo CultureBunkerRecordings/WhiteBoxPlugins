@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
+
 //==============================================================================
 /*
 */
@@ -24,20 +25,21 @@ public:
     void paint (Graphics&) override;
     void resized() override; 
     
-    float yAxisThresh;
     float xAxisThresh;
-    float yAxisRatio;
-    float yKnee;
     float xKnee;
     float xAxisInput;
-    float yAxisInput;
-
-    float yWitKnee;
+    float yAxisRatio;
     
-    float xComp;
+    float xComp; 
     float yComp;
 
-    int count;
+    float paintOutX;
+    float paintOutY;
+    
+    
+    
+
+
     CompressorTarrAudioProcessor& processor;
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransferFunction)
 };

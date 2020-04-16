@@ -12,10 +12,13 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "TransferFunction.h"
+#include "Tab1.h"
 //==============================================================================
 /*
 */
-class Tab2    : public Component
+class Tab2    : public Component,
+                       Slider::Listener
+
 {
 public:
     Tab2(CompressorTarrAudioProcessor&);
@@ -23,8 +26,14 @@ public:
 
     void paint (Graphics&) override;
     void resized() override;
-
+    void sliderValueChanged(Slider* slider) override;
+    //*******************************************************************************
+    //member variables
 private:
+    Slider T;
+    Slider R;
+    Slider W;
+    Tab1 tab1;
     TransferFunction trans;
     TextButton abs;
     TextButton dB;
