@@ -114,7 +114,7 @@ void TransferFunction::timerCallback()
     xAxisThresh = jmap<float>(*processor.T, -64.0f, 0.0f, 0.0f, 1.0f);
     yAxisRatio = *processor.R;
     xKnee = jmap<float>(*processor.knee, 0, 10, 0.0f, 1.0f);
-    xAxisInput = jmap<float>(*processor.inputGain,-48.0f, 12.0f, 400, 0);
+    xAxisInput = jmap<float>(*processor.inputGain,-48.0f, 12.0f, 0.f, 1.f);
 }
 
 

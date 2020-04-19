@@ -230,7 +230,7 @@ void CompressorTarrAudioProcessor::processBlock (AudioBuffer<float>& buffer, Mid
             
             if(sample % 100 == 0)
             {
-                paintOut = output;
+                paintOut = x;
             }
             
         }// ..do something to the data...

@@ -33,6 +33,8 @@ public:
         xComp = other.xComp;
         yComp = other.yComp;
         
+        paintOutX = other.paintOutX;
+        paintOutY = other.paintOutY;
         
         return *this;
     }
