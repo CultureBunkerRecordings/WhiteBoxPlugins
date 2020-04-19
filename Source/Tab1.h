@@ -26,8 +26,7 @@ class Tab1    : public Component,
 {
 public:
     Tab1(CompressorTarrAudioProcessor&);
-    ~Tab1();  
-
+    ~Tab1();
     void paint (Graphics&) override;
     void resized() override;
     void paintDialBackground(Graphics& g, int x, int y, int width, int height);

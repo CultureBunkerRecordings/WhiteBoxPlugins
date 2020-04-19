@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="p5Fdm6" name="compressorTarr" projectType="audioplug" jucerVersion="5.4.5">
+<JUCERPROJECT id="p5Fdm6" name="compressorTarr" projectType="audioplug" jucerVersion="5.4.7">
   <MAINGROUP id="HL4OYZ" name="compressorTarr">
     <GROUP id="{2981F006-58B5-5269-28B9-1D5EF414D7B1}" name="Source">
       <FILE id="mvrTw6" name="TransferFunction.cpp" compile="1" resource="0"
