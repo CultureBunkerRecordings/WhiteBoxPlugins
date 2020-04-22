@@ -20,7 +20,6 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), rat
     
     //*******************************************************************************
     //setup sliders
-    
     inputSlider.addListener(this);
     inputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
     inputSlider.setBounds(25, 200, 100, 100);
@@ -34,7 +33,7 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), rat
     outputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
     outputSlider.setBounds(625, 200, 100, 100);
     outputSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    outputSlider.setRange(-48, 12);
+    outputSlider.setRange(-48.0f, 12.0f);
     outputSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
     outputSlider.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(outputSlider);
@@ -61,7 +60,7 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), rat
     ratioSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
     ratioSlider.setBounds(187.5, 225, 75, 75);
     ratioSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    ratioSlider.setRange(1.0f, 10.0f);
+    ratioSlider.setRange(1, 10);
     ratioSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
     ratioSlider.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(ratioSlider);
@@ -169,10 +168,6 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), rat
     hpfSlider.addMouseListener(&click, false);
     hpfHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     hpfHelp.setPosition(&hpfSlider);
-    
-    
-    
-    
 
 }
 
@@ -183,25 +178,6 @@ Tab1::~Tab1()
 //*******************************************************************************
 void Tab1::timerCallback()
 {
-    //****************************************************************************
-    //automation for sliders
-    inputSlider.setValue(*processor.inputGain);
-    outputSlider.setValue(*processor.outputGain);
-    mixSlider.setValue(*processor.mix);
-    threshSlider.setValue(*processor.T);
-    ratioSlider.setValue(*processor.R);
-    kneeSlider.setValue(*processor.knee);
-    attackSlider.setValue(*processor.attack);
-    releaseSlider.setValue(*processor.release);
-    
-    //*******************************************************************************
-    // map values from sliders and passes values to TransferFunction at regular intervals dictated by Timer
-    
-    trans.xAxisThresh = jmap<float>(threshSlider.getValue(), -64.0f, 0.0f, 0.0f, 1.0f);
-    trans.yAxisRatio = ratioSlider.getValue();
-    trans.xKnee = jmap<float>(kneeSlider.getValue(), 0, 10, 0.0f, 1.0f);
-    trans.xAxisInput = jmap<float>(inputSlider.getValue(),-48.0f, 12.0f, 400, 0); 
-    
     //*******************************************************************************
     // show BubbleMessage if component is clicked
     

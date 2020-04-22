@@ -17,13 +17,30 @@
 /*
 */
 
-class TransferFunction    : public Component
+class TransferFunction    : public Component,
+                                   Timer
 {
 public:
     TransferFunction(CompressorTarrAudioProcessor&); 
     ~TransferFunction();
+    
+    TransferFunction& operator=(const TransferFunction &other){
+        xAxisThresh = other.xAxisThresh;
+        xKnee = other.xKnee;
+        xAxisInput = other.xAxisInput;
+        yAxisRatio = other.yAxisRatio;
+        
+        xComp = other.xComp;
+        yComp = other.yComp;
+        
+        paintOutX = other.paintOutX;
+        paintOutY = other.paintOutY;
+        
+        return *this;
+    }
     void paint (Graphics&) override;
-    void resized() override; 
+    void resized() override;
+    void timerCallback() override;
     
     float xAxisThresh;
     float xKnee;
@@ -36,10 +53,6 @@ public:
     float paintOutX;
     float paintOutY;
     
-    
-    
-
-
     CompressorTarrAudioProcessor& processor;
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransferFunction)
+    //JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TransferFunction)
 };

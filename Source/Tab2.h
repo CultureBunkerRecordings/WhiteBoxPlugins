@@ -17,7 +17,8 @@
 /*
 */
 class Tab2    : public Component,
-                       Slider::Listener
+                       Slider::Listener,
+                       Timer
 
 {
 public:
@@ -27,6 +28,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void sliderValueChanged(Slider* slider) override;
+    void timerCallback() override;
     //*******************************************************************************
     //member variables
 private:

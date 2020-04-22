@@ -13,8 +13,8 @@
 
 //==============================================================================
 Tab2::Tab2(CompressorTarrAudioProcessor& p): tab1(p), trans(p), processor(p)
-{ 
-    addAndMakeVisible(trans);
+{
+    Timer::startTimerHz(60);
     
     abs.setColour(TextButton::textColourOffId, juce::Colours::black);
     abs.setButtonText("abs");
@@ -50,6 +50,7 @@ Tab2::Tab2(CompressorTarrAudioProcessor& p): tab1(p), trans(p), processor(p)
     T.setNumDecimalPlacesToDisplay(1);
     addAndMakeVisible(T);
     
+    addAndMakeVisible(trans);
 }
 
 Tab2::~Tab2()
@@ -92,5 +93,11 @@ void Tab2::resized()
 void Tab2::sliderValueChanged(Slider* slider)
 {
     
+}
+
+void Tab2::timerCallback()
+{
+    trans = tab1.trans;
+    trans.repaint();
 }
 
