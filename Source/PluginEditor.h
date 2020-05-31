@@ -13,10 +13,16 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PluginProcessor.h"
 #include "dial.h"
+#include "Tab1.h"
+#include "Tab2.h"
+#include "TransferFunction.h"
 //==============================================================================
 /**
 */
 
+//*******************************************************************************
+// OtherlookAndFeel Class
+// override of LookAndFeel Class, slider and textButton look changed
 
 class OtherLookAndFeel : public LookAndFeel_V4
 {
@@ -26,6 +32,7 @@ public:
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                            const float rotaryStartAngle, const float rotaryEndAngle, Slider& slider) override
     {
+        //object to perform rotation
         AffineTransform rotator;
         
         //load image
@@ -53,6 +60,7 @@ public:
         g.setColour (Colours::darkgrey.withAlpha (0.5f));
         g.fillRect (buttonArea);
 
+        //when button down background is offset
         auto offset = isButtonDown ? -edge / 2 : -edge;
         buttonArea.translate (offset, offset);
         
@@ -62,13 +70,12 @@ public:
     
     void drawButtonText (Graphics& g, TextButton& button, bool isMouseOverButton, bool isButtonDown) override
     {
-
+        
         auto font = getTextButtonFont (button, button.getHeight());
         g.setFont (font);
         g.setColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
                                         : TextButton::textColourOffId)
                      .withMultipliedAlpha (button.isEnabled() ? 1.0f : 0.5f));
-        
         
         auto yIndent = jmin (4, button.proportionOfHeight (0.3f));
         auto cornerSize = jmin (button.getHeight(), button.getWidth()) / 2;
@@ -90,10 +97,12 @@ public:
     
 };
 
+//*******************************************************************************
 
-class CompressorTarrAudioProcessorEditor  : public AudioProcessorEditor,
-                                                   Slider::Listener,
-                                                   Button::Listener
+// CompressorTarrAudioProcessorEditor class
+
+class CompressorTarrAudioProcessorEditor  : public AudioProcessorEditor
+
 {
 public:
     CompressorTarrAudioProcessorEditor (CompressorTarrAudioProcessor&);
@@ -101,33 +110,17 @@ public:
 
     //==============================================================================
     void paint (Graphics&) override;
-    void paintDialBackground(Graphics& g, int x, int y, int width, int height);
-    void paintMixDialBackground(Graphics& g);
     void resized() override;
-    void sliderValueChanged(Slider* slider) override;
-    void buttonClicked (Button* button) override; // [2]
-    
+    //*******************************************************************************
+    //member variables
 private:
+    //instance of OtherlookAndFeel
     OtherLookAndFeel otherLookAndFeel;
-    ScopedPointer<FFAU::LevelMeterLookAndFeel> lnf;
-    ScopedPointer<FFAU::LevelMeter> meter;
     
-    Slider inputSlider;
-    Slider outputSlider;
-    Slider mixSlider;
-    Slider threshSlider;
-    Slider ratioSlider;
-    Slider kneeSlider;
-    Slider attackSlider;
-    Slider releaseSlider;
-    Slider hpfSlider;
-    TextButton whiteBox;
-    TextButton help;
-    
-    //currently implementing overriding Component classes for tabs
-//    TabbedComponent tabs;
-//    Component tab;
-//    Component tab2;
+    //TabbedComponent tabs owns classes Tab1 and Tab2.
+    TabbedComponent tabs;
+    Tab1 tab1;
+    Tab2 tab2;
     
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.

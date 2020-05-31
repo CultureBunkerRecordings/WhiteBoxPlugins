@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="p5Fdm6" name="compressorTarr" projectType="audioplug" jucerVersion="5.4.3">
+<JUCERPROJECT id="p5Fdm6" name="compressorTarr" projectType="audioplug" jucerVersion="5.4.7">
   <MAINGROUP id="HL4OYZ" name="compressorTarr">
     <GROUP id="{2981F006-58B5-5269-28B9-1D5EF414D7B1}" name="Source">
+      <FILE id="mvrTw6" name="TransferFunction.cpp" compile="1" resource="0"
+            file="Source/TransferFunction.cpp"/>
+      <FILE id="aaXxJj" name="TransferFunction.h" compile="0" resource="0"
+            file="Source/TransferFunction.h"/>
       <FILE id="Wx6PxU" name="Tab1.cpp" compile="1" resource="0" file="Source/Tab1.cpp"/>
       <FILE id="IWdBES" name="Tab1.h" compile="0" resource="0" file="Source/Tab1.h"/>
+      <FILE id="kEnQF5" name="Tab2.cpp" compile="1" resource="0" file="Source/Tab2.cpp"/>
+      <FILE id="Yq4EWT" name="Tab2.h" compile="0" resource="0" file="Source/Tab2.h"/>
       <FILE id="urZTb4" name="dial.cpp" compile="1" resource="0" file="Source/dial.cpp"/>
       <FILE id="hWgnF1" name="dial.h" compile="0" resource="0" file="Source/dial.h"/>
       <FILE id="PYjlLZ" name="PluginProcessor.cpp" compile="1" resource="0"
@@ -38,12 +44,10 @@
         <MODULEPATH id="juce_audio_processors" path="../../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_plugin_client" path="../../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_utils" path="../../../JUCE/modules"/>
-        <MODULEPATH id="ff_meters" path="."/>
       </MODULEPATHS>
     </XCODE_MAC>
   </EXPORTFORMATS>
   <MODULES>
-    <MODULE id="ff_meters" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
