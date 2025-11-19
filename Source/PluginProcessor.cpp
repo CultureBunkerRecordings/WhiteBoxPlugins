@@ -8,31 +8,35 @@
   ==============================================================================
 */
 
+#include "JuceHeader.h"
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
 //==============================================================================
 CompressorTarrAudioProcessor::CompressorTarrAudioProcessor()
-#ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
-                       )
+    : AudioProcessor(BusesProperties()
+#if ! JucePlugin_IsMidiEffect
+#if ! JucePlugin_IsSynth
+        .withInput("Input", juce::AudioChannelSet::stereo(), true)
 #endif
+        .withOutput("Output", juce::AudioChannelSet::stereo(), true)
+#endif
+    ),
+    parameters(*this, nullptr, "PARAMETERS",
+        {
+            std::make_unique<juce::AudioParameterFloat>("T", "Threshold", -64.0f, 0.0f, 0.0f),
+            std::make_unique<juce::AudioParameterFloat>("R", "Ratio", 1.0f, 10.0f, 1.0f),
+            std::make_unique<juce::AudioParameterFloat>("attack", "Attack", 0.0f, 1500.0f, 500.0f),
+            std::make_unique<juce::AudioParameterFloat>("release", "Release", 0.0f, 3000.0f, 500.0f),
+            std::make_unique<juce::AudioParameterFloat>("inputGain", "Input Gain", -48.0f, 12.0f, 0.0f),
+            std::make_unique<juce::AudioParameterFloat>("outputGain", "Output Gain", -48.0f, 12.0f, 0.0f),
+            std::make_unique<juce::AudioParameterFloat>("mix", "Mix", 0.0f, 100.0f, 0.0f),
+            std::make_unique<juce::AudioParameterFloat>("knee", "Knee", 0.0f, 10.0f, 0.0f),
+            std::make_unique<juce::AudioParameterFloat>("hpf", "Hpf", 0.0f, 10.0f, 0.0f)
+        })
 {
-    addParameter(T = new AudioParameterFloat("T", "Threshold", -64.0f, 0.0f, 0.0f));
-    addParameter(R = new AudioParameterFloat("R", "Ratio", 1.0f, 10.0f, 1.0f));
-    addParameter(attack = new AudioParameterFloat("attack", "Attack", 0.0f, 1500.0f, 500.0f));
-    addParameter(release = new AudioParameterFloat("release", "Release", 0.0f, 3000.0f, 500.0f));
-    addParameter(inputGain = new AudioParameterFloat("inputGain", "Input Gain", -48.0f, 12.0f, 0.0f));
-    addParameter(outputGain = new AudioParameterFloat("outputGain", "Output Gain", -48.0, 12.0f, 0.0f));
-    addParameter(mix = new AudioParameterFloat("mix", "Mix", 0.0f, 100.0f, 0.0f));
-    addParameter(knee = new AudioParameterFloat("knee", "Knee", 0.0f, 10.0f, 0.0f));
 }
+
 
 CompressorTarrAudioProcessor::~CompressorTarrAudioProcessor()
 {
@@ -117,125 +121,114 @@ void CompressorTarrAudioProcessor::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool CompressorTarrAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool CompressorTarrAudioProcessor::isBusesLayoutSupported(const juce::AudioProcessor::BusesLayout& layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    ignoreUnused (layouts);
+#if JucePlugin_IsMidiEffect
+    ignoreUnused(layouts);
     return true;
-  #else
-    // This is the place where you check if the layout is supported.
-    // In this template code we only support mono or stereo.
-    if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
+#else
+    // Only mono or stereo output is supported
+    if (layouts.getMainOutputChannelSet() != juce::AudioChannelSet::mono()
+        && layouts.getMainOutputChannelSet() != juce::AudioChannelSet::stereo())
         return false;
 
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
+    // Input must match output (unless synth)
+#if ! JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
-   #endif
+#endif
 
     return true;
-  #endif
+#endif
 }
 #endif
 
-void CompressorTarrAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+
+
+void CompressorTarrAudioProcessor::processBlock(AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
-    auto totalNumInputChannels  = getTotalNumInputChannels();
+    auto totalNumInputChannels = getTotalNumInputChannels();
     auto totalNumOutputChannels = getTotalNumOutputChannels();
+    auto numSamples = buffer.getNumSamples();
 
-    // In case we have more outputs than inputs, this code clears any output
-    // channels that didn't contain input data, (because these aren't
-    // guaranteed to be empty - they may contain garbage).
-    // This is here to avoid people getting screaming feedback
-    // when they first compile a plugin, but obviously you don't need to keep
-    // this code if your algorithm always overwrites all the output channels.
-    for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
-        buffer.clear (i, 0, buffer.getNumSamples());
+    // Load parameters safely
+    float threshold = parameters.getRawParameterValue("T")->load();
+    float ratio = std::max(0.01f, parameters.getRawParameterValue("R")->load()); // prevent divide by zero
+    float atk = std::max(0.1f, parameters.getRawParameterValue("attack")->load()); // ms
+    float rel = std::max(0.1f, parameters.getRawParameterValue("release")->load()); // ms
+    float inGain = parameters.getRawParameterValue("inputGain")->load();
+    float outGain = parameters.getRawParameterValue("outputGain")->load();
+    float mixVal = jlimit(0.0f, 100.0f, parameters.getRawParameterValue("mix")->load());
+    float kneeVal = std::max(0.0001f, parameters.getRawParameterValue("knee")->load()); // prevent divide by zero
+    float hpf = parameters.getRawParameterValue("hpf")->load();
 
-    float alphaA = exp(-logf(9.0)/(Fs * (*attack) * 0.0001));
-    float alphaR = exp(-logf(9.0)/(Fs * (*release) * 0.0001));
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    // Make sure to reset the state if your inner loop is processing
-    // the samples and the outer loop is handling the channels.
-    // Alternatively, you can process the samples with the channels
-    // interleaved by keeping the same state.
-    for (int sample = 0; sample<buffer.getNumSamples();++sample)
+    // Clear extra output channels
+    for (int i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+        buffer.clear(i, 0, numSamples);
+
+    // Convert attack/release to smoothing coefficients
+    float alphaA = expf(-logf(9.0f) / (Fs * atk * 0.001f)); // ms -> seconds
+    float alphaR = expf(-logf(9.0f) / (Fs * rel * 0.001f));
+
+    float peakOutput = 0.0f;
+
+    for (int sample = 0; sample < numSamples; ++sample)
     {
-    
-        for (int channel = 0; channel < totalNumInputChannels; ++channel){
-            
-            float linIn = powf(10.0f, (*inputGain)/20.0f);
-            
-            float x = buffer.getWritePointer (channel)[sample] * linIn;
-            
-//            meterSource.measureBlock(buffer);
-            
-            //this is where compressor goes
-            float x_Pos = fabs(x);
-            float x_dB = 20*log10(x_Pos);
-            
-            if (x_dB < -144.0f)
+        for (int channel = 0; channel < totalNumInputChannels; ++channel)
+        {
+            // Apply input gain
+            float linIn = powf(10.0f, inGain / 20.0f);
+            float x = buffer.getWritePointer(channel)[sample] * linIn;
+
+            // Convert to dB safely
+            float x_dB = 20.0f * log10f(std::max(fabs(x), 1e-10f));
+            x_dB = jmax(-144.0f, x_dB);
+
+            // Compute compressor output dB
+            float xSC = x_dB;
+
+            if (2.0f * (x_dB - threshold) < -kneeVal)
             {
-                x_dB = -144.0f;
-                
-            }
-            // x_dB = jmax(-144.0f, x_dB);      juce way
-            
-            float xSC = 0;
-            
-            if (2*(x_dB - *T) < -*knee)
-            {
-                //no comp
                 xSC = x_dB;
             }
-            else if (2* abs(x_dB - *T)<= *knee)
+            else if (2.0f * fabs(x_dB - threshold) <= kneeVal)
             {
-                //yes comp
-                xSC = x_dB+(1/(*R) - 1)*std::pow(x_dB - (*T)+(*knee)/2, 2)/(2 * (*knee));
+                float delta = x_dB - threshold + kneeVal * 0.5f;
+                xSC = x_dB + (1.0f / ratio - 1.0f) * (delta * delta) / (2.0f * kneeVal);
             }
-            else{
-                xSC = *T+(x_dB - *T)/(*R);
+            else
+            {
+                xSC = threshold + (x_dB - threshold) / ratio;
             }
-                //compare
+
+            // Smooth gain change
             float gainChange = xSC - x_dB;
-            float gainChangeSmooth;
-                //smooth
-            if (gainChange < prevGainChange){
-                    //attack
-                    gainChangeSmooth = (1- alphaA) * gainChange + alphaA * prevGainChange;
+            float gainChangeSmooth = (gainChange < prevGainChange)
+                ? (1.0f - alphaA) * gainChange + alphaA * prevGainChange
+                : (1.0f - alphaR) * gainChange + alphaR * prevGainChange;
 
-                }
-            else{
-                    //release
-                    gainChangeSmooth = (1- alphaR) * gainChange + alphaR * prevGainChange;
-
-                
-                }
-            
-            float gLin = powf(10.0f, gainChangeSmooth/20.0f);
-            
             prevGainChange = gainChangeSmooth;
-            
-            float linOut = powf(10.0f, (*outputGain)/20.0f);
-            
-            float output = (gLin * x) * linOut;
-            
-            float mixer = (*mix)/100;
-            
-            buffer.getWritePointer(channel)[sample] = phase * mixer*output + (1-mixer)*x;
-            
-            if(sample % 100 == 0)
-            {
-                paintOut = x;
-            }
-            
-        }// ..do something to the data...
+
+            // Convert back to linear
+            float gLin = powf(10.0f, gainChangeSmooth / 20.0f);
+            float linOut = powf(10.0f, outGain / 20.0f);
+
+            float output = gLin * x * linOut;
+
+            // Mix dry/wet safely
+            float mixer = jlimit(0.0f, 1.0f, mixVal / 100.0f);
+            buffer.getWritePointer(channel)[sample] = mixer * output + (1.0f - mixer) * x;
+
+            // Track peak for visualization
+            peakOutput = jmax(peakOutput, fabs(output));
+        }
     }
+
+    // Clamp for TransferFunction visualization
+    paintOut = jlimit(0.0f, 1.0f, peakOutput);
 }
+
 
 //==============================================================================
 bool CompressorTarrAudioProcessor::hasEditor() const
@@ -255,15 +248,8 @@ void CompressorTarrAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
     
-    std::unique_ptr<XmlElement> xml(new XmlElement("Params"));
-    xml->setAttribute("T", static_cast<double>(*T));
-    xml->setAttribute("R", static_cast<double>(*R));
-    xml->setAttribute("attack", static_cast<double>(*attack));
-    xml->setAttribute("release", static_cast<double>(*release));
-    xml->setAttribute("inputGain", static_cast<double>(*inputGain));
-    xml->setAttribute("outputGain", static_cast<double>(*outputGain));
-    xml->setAttribute("mix", static_cast<double>(*mix));
-    xml->setAttribute("knee", static_cast<double>(*knee));
+    auto state = parameters.copyState();
+    std::unique_ptr<juce::XmlElement> xml(state.createXml());
     copyXmlToBinary(*xml, destData);
 }
 
@@ -272,18 +258,10 @@ void CompressorTarrAudioProcessor::setStateInformation (const void* data, int si
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
     
-    std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
-    if(xmlState != nullptr){
-        if(xmlState->hasTagName("Params")){
-            *T = xmlState->getDoubleAttribute("T", 0.0);
-            *R = xmlState->getDoubleAttribute("R", 1.0);
-            *attack = xmlState->getDoubleAttribute("attack", 0.0);
-            *release = xmlState->getDoubleAttribute("release", 0.0);
-            *inputGain = xmlState->getDoubleAttribute("inputGain", 0.0);
-            *outputGain = xmlState->getDoubleAttribute("outputGain", 0.0);
-            *mix = xmlState->getDoubleAttribute("mix", 0.0);
-            *knee = xmlState->getDoubleAttribute("knee", 0.0);
-        }
+    std::unique_ptr<juce::XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+    if (xmlState != nullptr)
+    {
+        parameters.replaceState(juce::ValueTree::fromXml(*xmlState));
     }
     
 }

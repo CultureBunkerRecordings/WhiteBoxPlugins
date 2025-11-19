@@ -1,121 +1,192 @@
-/*
-  ==============================================================================
-
-    TransferFunction.cpp
-    Created: 20 Dec 2019 10:12:18am
-    Author:  William Eden
-
-  ==============================================================================
-*/
-
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "TransferFunction.h"
-//==============================================================================
-TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p): xAxisThresh(1), xKnee(0), xAxisInput(0), yAxisRatio(1), xComp(0), yComp(0), paintOutX(0), paintOutY(0), processor(p)
-{ 
-     //In your constructor, you should add any child components, and
-    //initialise any special settings that your component needs.
-    Timer::startTimerHz(60);
-    setBounds(200, 25, 400, 150);
-    
+
+TransferFunction::TransferFunction(CompressorTarrAudioProcessor& p)
+    : processor(p),
+    xPos(0.0f)
+{
+    smoothOut.reset(60.0, 0.05);   // UI smoothing 50 ms
+    startTimerHz(60);              // 60 FPS
 }
 
-TransferFunction::~TransferFunction()
-{
-}
+TransferFunction::~TransferFunction() {}
 
 void TransferFunction::paint(Graphics& g)
 {
-    
-    //*******************************************************************************
-    //background colour
-    g.fillAll (juce::Colours::grey);
-    
-    //*******************************************************************************
-    //path to draw transfer function from
-    Path p;
-    
-    //loop for drawing tranfer function, transfer function taken from PluginProcessor.cpp
-    for (int i = 0; i < getWidth(); ++i){
-        
-        float insample = jmap<float>(i, 0.0f, getWidth(), 0.0f, 1.0f);
-        float yOut = 0.0f;
-        
-        if (2*(insample - xAxisThresh) < -xKnee)
-        {
-            //no comp
-            yOut = insample;
+    const int w = getWidth();
+    const int h = getHeight();
 
-        }
-        else if (2* abs(insample - xAxisThresh) <= xKnee)
+    if (w <= 2 || h <= 2)
+        return;
+
+    // ----------------------------------------
+    // LAYOUT: reserve margin for Y-axis labels
+    // ----------------------------------------
+    const int labelMargin = 40;       // Left margin for labels
+    const int graphX = labelMargin;   // Graph starts here
+    const int graphW = w - labelMargin;
+
+    const float topMargin = 10.0f;
+    const float bottomMargin = 10.0f;
+    const float graphHeight = h - (topMargin + bottomMargin);
+
+    // Background
+    g.fillAll(Colours::grey.withAlpha(0.1f));
+
+    // ------------------------
+    // Y-axis grid with dB labels
+    // ------------------------
+    constexpr float dBMarks[] = { -48, -36, -24, -18, -12, -6, 0 };
+    constexpr int numMarks = sizeof(dBMarks) / sizeof(float);
+
+    g.setColour(Colours::darkgrey.withAlpha(0.4f));
+    g.setFont(12.0f);
+
+    auto dBToY = [h, topMargin, bottomMargin, graphHeight](float dB)
         {
-            //yes comp
-            yOut = insample+(1/yAxisRatio - 1)* std::pow(insample - xAxisThresh + xKnee/2, 2)/(2*xKnee);
-        }
-        else if (2 * (insample - xAxisThresh) > xKnee){
-            yOut = xAxisThresh + (insample - xAxisThresh)/yAxisRatio;
-        }
-        float ycor = jmap<float>(yOut, 0.0f, 1.0f, getHeight(), 0.0f);
-        p.lineTo(i, ycor);
+            // Map dBFS to pixel (top = 0 dB, bottom = -48 dB)
+            float y = topMargin + jmap(dB, -48.0f, 0.0f, graphHeight, 0.0f);
+            return std::clamp(y, topMargin, topMargin + graphHeight);
+        };
+
+    for (int i = 0; i < numMarks; ++i)
+    {
+        float db = dBMarks[i];
+        float y = dBToY(db);
+
+        // Horizontal grid line
+        g.drawLine((float)graphX, y, (float)w, y, 1.0f);
+
+        // Label
+        g.drawText(String((int)db) + " dB",
+            2,
+            (int)y - 7,
+            labelMargin - 4,
+            14,
+            Justification::centredRight);
     }
-    
-    //*******************************************************************************
-    //path to draw grid from
-    Path p2;
-    Path p3;
-    
-    float gridY = 18.6; //height/8
-    float gridX = 50;//width/8
-    
-    //loop for drawing graph
-    for(int j = 0; j<8; ++j){
-        p2.startNewSubPath(0, gridY * j);
-        p2.lineTo(getWidth(), gridY * j);
-    };
-    for(int x = 0; x<8; ++x){
-        p2.startNewSubPath(gridX * x, 0);
-        p2.lineTo(gridX * x, getHeight());
+
+    // ------------------------
+    // Fetch DSP parameters
+    // ------------------------
+    float safeThreshold = std::clamp(currentThreshold, -144.0f, 0.0f);
+    float safeKnee = std::max(0.0001f, currentKnee);
+    float safeRatio = std::max(0.01f, currentRatio);
+
+    // ------------------------
+    // Draw transfer curve
+    // ------------------------
+    Path curve;
+    bool firstPoint = true;
+
+    for (int i = 0; i < graphW; ++i)
+    {
+        float inLin = jmap<float>(i, 0.0f, (float)(graphW - 1), 0.0f, 1.0f);
+        float in_dB = 20.0f * log10f(std::max(inLin, 1e-10f));
+        in_dB = jmax(-144.0f, in_dB);
+
+        float out_dB;
+
+        if (2.0f * (in_dB - safeThreshold) < -safeKnee)
+            out_dB = in_dB;
+        else if (2.0f * fabs(in_dB - safeThreshold) <= safeKnee)
+        {
+            float delta = in_dB - safeThreshold + safeKnee * 0.5f;
+            out_dB = in_dB + (1.0f / safeRatio - 1.0f) * (delta * delta) / (2.0f * safeKnee);
+        }
+        else
+            out_dB = safeThreshold + (in_dB - safeThreshold) / safeRatio;
+
+        // Map output dB to pixel
+        float x = graphX + (float)i;
+        float y = dBToY(out_dB);
+
+        if (firstPoint)
+        {
+            curve.startNewSubPath(x, y);
+            firstPoint = false;
+        }
+        else
+            curve.lineTo(x, y);
     }
-    
-    //*******************************************************************************
-    //set colour and fill paths
-    
-    g.setColour(Colours::darkgrey);
-    g.strokePath(p2, PathStrokeType(1));
-    
-    g.setColour (Colours::white);
-    g.strokePath(p, PathStrokeType(2));
-    
-    for (int i = 0; i<getHeight(); ++i){
-        p3.startNewSubPath(0, getHeight());
-        paintOutY = jmap<float>(processor.paintOut, getHeight(), 0);
-        paintOutX = jmap<float>(processor.paintOut, 0, getWidth());
-        
-        p3.lineTo(paintOutX, paintOutY);
-        g.setColour(Colours::red);
-        g.strokePath(p3, PathStrokeType(3));
-        
-    };
-    
+
+    g.setColour(Colours::black.withAlpha(0.35f));
+    g.strokePath(curve, PathStrokeType(2));
+
+    // ------------------------
+    // Vertical grid
+    // ------------------------
+    Path grid;
+    float gx = graphW / 8.0f;
+
+    for (int j = 0; j <= 8; ++j)
+    {
+        float x = graphX + j * gx;
+        grid.startNewSubPath(x, topMargin);
+        grid.lineTo(x, topMargin + graphHeight);
+    }
+
+    g.setColour(Colours::darkgrey.withAlpha(0.3f));
+    g.strokePath(grid, PathStrokeType(1));
+
+    // ------------------------
+    // Trailing output meter in dBFS
+    // ------------------------
+    float smoothed = smoothOut.getNextValue();
+    smoothed = std::clamp(smoothed, 0.0f, 1.0f);
+    float yOut = dBToY(20.0f * log10f(std::max(smoothed, 1e-10f)));
+
+    int idx = static_cast<int>(xPos);
+    float trailX = graphX + xPos;
+
+    if (trailPoints.size() < (size_t)graphW)
+        trailPoints.push_back({ trailX, yOut });
+    else
+        trailPoints[idx % graphW] = { trailX, yOut };
+
+    Path trail;
+    if (!trailPoints.empty())
+    {
+        trail.startNewSubPath(trailPoints[0]);
+        for (size_t i = 1; i < trailPoints.size(); ++i)
+        {
+            float xP = std::clamp(trailPoints[i].x, (float)graphX, (float)w - 1.0f);
+            float yP = std::clamp(trailPoints[i].y, topMargin, topMargin + graphHeight);
+            trail.lineTo(xP, yP);
+        }
+    }
+
+    g.setColour(Colours::red.withAlpha(0.35f));
+    g.strokePath(trail, PathStrokeType(2));
+
+    // ------------------------
+    // Advance x-position
+    // ------------------------
+    xPos += 1.0f;
+    if (xPos >= graphW)
+        xPos = 0.0f;
+}
+
+
+
+
+
+void TransferFunction::timerCallback()
+{
+    // Update smoothed peak
+    smoothOut.setTargetValue(processor.paintOut);
+
+    // ===============================
+    // READ RAW DSP PARAMETERS IN dB
+    // (no normalization!)
+    // ===============================
+    currentThreshold = processor.parameters.getRawParameterValue("T")->load();       // dB
+    currentKnee = processor.parameters.getRawParameterValue("knee")->load();    // dB
+    currentRatio = processor.parameters.getRawParameterValue("R")->load();       // ratio
+
+    repaint();
 }
 
 void TransferFunction::resized()
 {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
-
 }
-
-void TransferFunction::timerCallback()
-{
-    //*******************************************************************************
-    // map values from sliders and passes values to TransferFunction at regular intervals dictated by Timer
-    
-    xAxisThresh = jmap<float>(*processor.T, -64.0f, 0.0f, 0.0f, 1.0f);
-    yAxisRatio = *processor.R;
-    xKnee = jmap<float>(*processor.knee, 0, 10, 0.0f, 1.0f);
-    xAxisInput = jmap<float>(*processor.inputGain,-48.0f, 12.0f, 0.f, 1.f);
-}
-
-
-

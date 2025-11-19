@@ -13,23 +13,17 @@
 
 //==============================================================================
 CompressorTarrAudioProcessorEditor::CompressorTarrAudioProcessorEditor (CompressorTarrAudioProcessor& p)
-: /*C(p),*/ AudioProcessorEditor (&p), tabs(TabbedButtonBar::Orientation::TabsAtTop), tab1(p), tab2(p), processor(p)
+: /*C(p),*/ AudioProcessorEditor (&p), tabs(TabbedButtonBar::Orientation::TabsAtTop), tab1(p), processor(p)
 { 
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
-    //trying to work out tabs
     
-    setSize (800, 400);
-    
-    //set overriden lookandfeel
-    setLookAndFeel(&otherLookAndFeel);
-    
-    //add tab1 and tab2
+    //add tab1
+    setSize(800, 400);
     tabs.setSize(getWidth(), getHeight());
-    tabs.addTab("myTab", juce::Colours::ghostwhite, &tab1, false);
-    tabs.addTab("myTab2", juce::Colours::ghostwhite, &tab2, false);
+    tabs.addTab("Compressor", juce::Colours::ghostwhite, &tab1, false);
     tabs.setTabBarDepth(20);
     addAndMakeVisible(tabs);
+
+
 }
 
 CompressorTarrAudioProcessorEditor::~CompressorTarrAudioProcessorEditor()
@@ -42,7 +36,7 @@ CompressorTarrAudioProcessorEditor::~CompressorTarrAudioProcessorEditor()
 //==============================================================================
 void CompressorTarrAudioProcessorEditor::paint (Graphics& g)
 {
-    g.fillAll(juce::Colours::ghostwhite);
+    g.fillAll(juce::Colours::whitesmoke);
    
 }
 

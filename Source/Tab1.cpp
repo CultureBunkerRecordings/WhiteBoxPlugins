@@ -1,4 +1,4 @@
-/*
+﻿/*
   ==============================================================================
 
     Tab1.cpp
@@ -11,156 +11,145 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Tab1.h"
 
-//==============================================================================
-Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), ratio(0), knee(0), input(0), processor(p)
-{ 
-    //*******************************************************************************
-    //start loop for timerCallBack() at 60Hz
-    Timer::startTimerHz(60);
-    
-    //*******************************************************************************
-    //setup sliders
-    inputSlider.addListener(this);
-    inputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    inputSlider.setBounds(25, 200, 100, 100);
-    inputSlider.setSliderStyle(Slider::RotaryVerticalDrag);
-    inputSlider.setRange(-48.0f, 12.0f);
-    inputSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    inputSlider.setNumDecimalPlacesToDisplay(1);
+Tab1::Tab1(CompressorTarrAudioProcessor& p)
+    : processor(p), trans(p), isClicked(false)
+{
+    setLookAndFeel(&tabLookAndFeel);
+
+    startTimerHz(60); // repaint timer
+
+    // -----------------------
+    // Setup sliders & attachments
+    // -----------------------
+    // Input Gain
     addAndMakeVisible(inputSlider);
-    
-    outputSlider.addListener(this);
-    outputSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    outputSlider.setBounds(625, 200, 100, 100);
-    outputSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    outputSlider.setRange(-48.0f, 12.0f);
-    outputSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    outputSlider.setNumDecimalPlacesToDisplay(1);
+    inputSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    inputSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    inputSlider.setRange(-48.0f, 12.0f);
+    inputAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "inputGain", inputSlider);
+    inputSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // Output Gain
     addAndMakeVisible(outputSlider);
-    
-    mixSlider.addListener(this);
-    mixSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    mixSlider.setBounds(325, 200, 100, 100);
-    mixSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    mixSlider.setRange(0.0f, 100.0f);
-    mixSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    mixSlider.setNumDecimalPlacesToDisplay(1);
+    outputSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    outputSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    outputSlider.setRange(-48.0f, 12.0f);
+    outputAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "outputGain", outputSlider);
+    outputSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // Mix
     addAndMakeVisible(mixSlider);
-    
-    threshSlider.addListener(this);
-    threshSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    threshSlider.setBounds(125, 225, 75, 75);
-    threshSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    threshSlider.setRange(-64.0f, 0.0f);
-    threshSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    threshSlider.setNumDecimalPlacesToDisplay(1);
+    mixSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    mixSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    mixSlider.setRange(0.0f, 100.0f);
+    mixAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "mix", mixSlider);
+    mixSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // Threshold
     addAndMakeVisible(threshSlider);
-    
-    ratioSlider.addListener(this);
-    ratioSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    ratioSlider.setBounds(187.5, 225, 75, 75);
-    ratioSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    ratioSlider.setRange(1, 10);
-    ratioSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    ratioSlider.setNumDecimalPlacesToDisplay(1);
+    threshSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    threshSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    threshSlider.setRange(-64.0f, 0.0f);
+    threshAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "T", threshSlider);
+    threshSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // Ratio
     addAndMakeVisible(ratioSlider);
-    
-    kneeSlider.addListener(this);
-    kneeSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    kneeSlider.setBounds(250, 225, 75, 75);
-    kneeSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    kneeSlider.setRange(0.0f, 10.0f);
-    kneeSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    kneeSlider.setNumDecimalPlacesToDisplay(1);
+    ratioSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    ratioSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    ratioSlider.setRange(1.0f, 10.0f);
+    ratioAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "R", ratioSlider);
+    ratioSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // Knee
     addAndMakeVisible(kneeSlider);
-    
-    attackSlider.addListener(this);
-    attackSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    attackSlider.setBounds(425, 225, 75, 75);
-    attackSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    attackSlider.setRange(0.0f, 1500.0f);
-    attackSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    attackSlider.setNumDecimalPlacesToDisplay(1);
+    kneeSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    kneeSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    kneeSlider.setRange(0.0f, 10.0f);
+    kneeAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "knee", kneeSlider);
+    kneeSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // Attack
     addAndMakeVisible(attackSlider);
-    
-    releaseSlider.addListener(this);
-    releaseSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    releaseSlider.setBounds(487.5, 225, 75, 75);
-    releaseSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    releaseSlider.setRange(0.0f, 3000.0f);
-    releaseSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    releaseSlider.setNumDecimalPlacesToDisplay(1);
+    attackSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    attackSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    attackSlider.setRange(0.0f, 1500.0f);
+    attackAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "attack", attackSlider);
+    attackSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // Release
     addAndMakeVisible(releaseSlider);
-    
-    hpfSlider.addListener(this);
-    hpfSlider.setColour(Slider::textBoxTextColourId, juce::Colours::black);
-    hpfSlider.setBounds(550, 225, 75, 75);
-    hpfSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
-    hpfSlider.setRange(0.0f, 500.0f);
-    hpfSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
-    hpfSlider.setNumDecimalPlacesToDisplay(1);
+    releaseSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    releaseSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    releaseSlider.setRange(0.0f, 3000.0f);
+    releaseAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "release", releaseSlider);
+    releaseSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // HPF
     addAndMakeVisible(hpfSlider);
-    
-    //*******************************************************************************
-    //setup buttons
-    
-    whiteBox.addListener(this);
-    whiteBox.setBounds(25, 20, 100, 20);
-    whiteBox.setButtonText("White Box");
-    addAndMakeVisible(whiteBox);
-    
+    hpfSlider.setSliderStyle(Slider::RotaryHorizontalVerticalDrag);
+    hpfSlider.setTextBoxStyle(Slider::TextBoxBelow, false, 40, 15);
+    hpfSlider.setRange(0.0f, 500.0f);
+    hpfAttachment = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(
+        processor.parameters, "hpf", hpfSlider);
+    hpfSlider.setColour(Slider::textBoxTextColourId, Colours::black);
+
+    // -----------------------
+    // Make TransferFunction visible
+    // -----------------------
+    addAndMakeVisible(&trans);
+
+    help.setButtonText("White Box");
+    addAndMakeVisible(help);
     help.addListener(this);
-    help.setBounds(650, 20, 100, 20);
-    help.setButtonText("Help");
-    help.setColour(ToggleButton::tickDisabledColourId, Colours::black);
     help.setColour(ToggleButton::tickColourId, Colours::black);
     help.setColour(ToggleButton::textColourId, Colours::black);
-    addAndMakeVisible(help);
-    
-    phaseInvert.addListener(this);
-    phaseInvert.setBounds(650, 60, 100, 20);
-    phaseInvert.setButtonText("Phase");
-    phaseInvert.setColour(ToggleButton::tickColourId, Colours::black);
-    phaseInvert.setColour(ToggleButton::tickDisabledColourId, Colours::black);
-    phaseInvert.setColour(ToggleButton::textColourId, Colours::black);
+
+    phaseInvert.setButtonText("Phase Invert");
     addAndMakeVisible(phaseInvert);
+    phaseInvert.addListener(this);
+    phaseInvert.setColour(ToggleButton::tickColourId, Colours::black);
+    phaseInvert.setColour(ToggleButton::textColourId, Colours::black);
 
-
-    
-    //make TransferFuncction visible
-    addAndMakeVisible(&trans);
-    
-    //*******************************************************************************
-    //setup BubbleMessageComponents and MouseListener
-    
+    // -----------------------
+    // Bubble message components
+    // -----------------------
     inputSlider.addMouseListener(&click, false);
     inputHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     inputHelp.setPosition(&inputSlider);
-    
+
     outputSlider.addMouseListener(&click, false);
     outputHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     outputHelp.setPosition(&outputSlider);
-    
+
     mixSlider.addMouseListener(&click, false);
     mixHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     mixHelp.setPosition(&mixSlider);
-    
+
     threshSlider.addMouseListener(&click, false);
     threshHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     threshHelp.setPosition(&threshSlider);
-    
+
     ratioSlider.addMouseListener(&click, false);
     ratioHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     ratioHelp.setPosition(&ratioSlider);
-    
+
     attackSlider.addMouseListener(&click, false);
     attackHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     attackHelp.setPosition(&attackSlider);
-    
+
     kneeSlider.addMouseListener(&click, false);
     kneeHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     kneeHelp.setPosition(&kneeSlider);
-    
+
     releaseSlider.addMouseListener(&click, false);
     releaseHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     releaseHelp.setPosition(&releaseSlider);
@@ -168,11 +157,13 @@ Tab1::Tab1(CompressorTarrAudioProcessor& p):  trans(p), count(0), thresh(0), rat
     hpfSlider.addMouseListener(&click, false);
     hpfHelp.setColour(BubbleMessageComponent::backgroundColourId, Colours::white);
     hpfHelp.setPosition(&hpfSlider);
-
 }
+
+
 
 Tab1::~Tab1()
 {
+    setLookAndFeel(nullptr);
 };
 
 //*******************************************************************************
@@ -234,6 +225,12 @@ void Tab1::timerCallback()
     trans.repaint();
 };
 
+void Tab1::sliderValueChanged (Slider* slider) // [1]
+{
+    //*******************************************************************************
+    //nothing happening yet
+};
+
 //*******************************************************************************
 //nothing happening yet
 void Tab1::buttonClicked (Button* button) // [2]
@@ -252,95 +249,60 @@ void Tab1::buttonClicked (Button* button) // [2]
 };
 
 //*******************************************************************************
-//primitive slider to processsor technique, need to utilise ValueTreeState
-
-void Tab1::sliderValueChanged(Slider* slider)
-{
-    if (slider == &inputSlider)
-    {
-        *processor.inputGain = slider->getValue();
-    }
-    if (slider == &outputSlider)
-    {
-        *processor.outputGain = slider->getValue();
-    }
-    if (slider == &mixSlider)
-    {
-        *processor.mix = slider->getValue();
-    }
-    if (slider == &kneeSlider)
-    {
-        *processor.knee = slider->getValue();
-    }
-    if (slider == &threshSlider)
-    {
-        *processor.T = slider->getValue();
-    }
-    
-    if (slider == &ratioSlider)
-    {
-        *processor.R = slider->getValue();
-    }
-    
-    if (slider == &attackSlider)
-    {
-        *processor.attack = slider->getValue();
-    }
-    
-    if (slider == &releaseSlider)
-    {
-        *processor.release = slider->getValue();
-    }
-};
-
-//*******************************************************************************
-// code for drawing mixdial background
-void Tab1::paintMixDialBackground(Graphics& g)
-{
-    Path p1;
-    Path p2;
-    ColourGradient grade(Colours::green, 325, 125, Colours::red, 425, 125, false);
-    g.setColour(Colours::grey);
-    p1.addPieSegment(325, 200, 100, 100, -2.5, 2, 0.9);
-    g.strokePath(p1, PathStrokeType(5));
-    p2.addPieSegment(325, 200, 100, 100, -2.5, 2, 0.9);
-    g.setGradientFill(grade);
-    g.fillPath(p2);
-    
-};
-
-//*******************************************************************************
 // code for drawing other dial backgrounds
 
-void Tab1::paintDialBackground(Graphics& g, int x, int y, int width, int height)
+void Tab1::paintDialBackground(Graphics& g,
+    int x, int y,
+    int width, int height)
 {
-    Path p1;
-    Path p2;
-    Path p3;
-    Path p4;
-    g.setColour(Colours::grey);
-    p4.addPieSegment(x, y, width, height, -2.5, 2, 0.9);
-    g.strokePath(p4, PathStrokeType(5));
-    g.setColour(Colours::green);
-    p1.addPieSegment(x, y, width, height, -2.5, 1, 0.9);
-    g.fillPath(p1);
-    g.setColour(Colours::orange);
-    p2.addPieSegment(x, y, width, height, 1, 1.5, 0.9);
-    g.fillPath(p2);
-    g.setColour(Colours::red);
-    p3.addPieSegment(x, y, width, height, 1.5, 2, 0.9);
-    g.fillPath(p3);
-    
-};
+    constexpr float start = -2.5f;   // 7 o'clock
+    constexpr float end = 2.0f;      // 4 o'clock
+    constexpr float thickness = 0.85f;
+
+    // Outer grey stroke
+    Path arcStroke;
+    arcStroke.addPieSegment((float)x, (float)y,
+        (float)width, (float)height,
+        start, end, thickness);
+    g.setColour(Colours::black);
+    g.strokePath(arcStroke, PathStrokeType(5.0f));
+
+    // ------------------------
+    // White → Dark Grey gradient fill
+    // ------------------------
+    float cx = x + width * 0.5f;
+    float cy = y + height * 0.5f;
+
+    // Create a simple linear gradient from left to right across the arc bounds
+    ColourGradient grad(Colours::white, cx - width * 0.5f, cy,
+        Colours::darkgrey, cx + width * 0.5f, cy,
+        false);
+
+    // Define the pie segment (arc) to fill
+    Path arcFill;
+    arcFill.addPieSegment((float)x, (float)y,
+        (float)width, (float)height,
+        start, end, thickness);
+
+    // Apply gradient and fill the arc
+    g.setGradientFill(grad);
+    g.fillPath(arcFill);
+}
+
+
+
 
 
 void Tab1::paint (Graphics& g)
 {
     g.fillAll (Colours::ghostwhite);
-    
-    paintDialBackground(g, 25, 200, 100, 100);
-    paintMixDialBackground(g);
-    paintDialBackground(g, 625, 200, 100, 100);
+    int sliderSize = 100;
+
+    // Only draw backgrounds for the three large knobs:
+    paintDialBackground(g, 25, 200, sliderSize, sliderSize);   // Input
+    paintDialBackground(g, 322, 200, sliderSize, sliderSize);// Mix (uses fixed 325,200)
+    paintDialBackground(g, 625, 200, sliderSize, sliderSize);  // Output
+
     
     g.setColour(Colours::black);
     g.drawFittedText("input", 25, 275, 100, 100, Justification::centred, 1);
@@ -356,7 +318,38 @@ void Tab1::paint (Graphics& g)
 
 void Tab1::resized()
 {
-    // This method is where you should set the bounds of any child
-    // components that your component contains..
+    int sliderSize = 100;
 
+    inputSlider.setBounds(25, 200, sliderSize, sliderSize);
+    threshSlider.setBounds(112, 200, sliderSize, sliderSize);
+    ratioSlider.setBounds(175, 200, sliderSize, sliderSize);
+    kneeSlider.setBounds(237, 200, sliderSize, sliderSize);
+    mixSlider.setBounds(325, 200, sliderSize, sliderSize);
+    attackSlider.setBounds(412, 200, sliderSize, sliderSize);
+    releaseSlider.setBounds(475, 200, sliderSize, sliderSize);
+    hpfSlider.setBounds(537, 200, sliderSize, sliderSize);
+    outputSlider.setBounds(625, 200, sliderSize, sliderSize);
+
+    // --- Buttons stacked on right ---
+    int buttonWidth = 100;
+    int buttonHeight = 25;
+    int marginRight = 25;
+    int spacing = 10; // space between buttons
+
+    int startX = getWidth() - marginRight - buttonWidth;
+    int startY = 50;
+
+    help.setBounds(startX, startY + (buttonHeight + spacing), buttonWidth, buttonHeight);
+    phaseInvert.setBounds(startX, startY + 2 * (buttonHeight + spacing), buttonWidth, buttonHeight);
+
+
+    int tfWidth = 400;
+    int tfHeight = 150;
+
+    int tfX = (getWidth() - tfWidth) / 2;   // center horizontally
+    int tfY = (getHeight() - tfHeight) / 2;  // center vertically
+
+    tfY -= 75;
+
+    trans.setBounds(tfX, tfY, tfWidth, tfHeight);
 }

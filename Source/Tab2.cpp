@@ -97,7 +97,5 @@ void Tab2::sliderValueChanged(Slider* slider)
 
 void Tab2::timerCallback()
 {
-    trans = tab1.trans;
-    trans.repaint();
 }
 

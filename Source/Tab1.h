@@ -11,58 +11,52 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-
-#include "dial.h"
 #include "PluginProcessor.h"
 #include "TransferFunction.h"
-//==============================================================================
-/*
-*/
+#include "OtherLookAndFeel.h"
 
-class Tab1    : public Component,
-                       Slider::Listener,
-                       Button::Listener,
-                       Timer
+class Tab1 : public juce::Component,
+    public juce::Slider::Listener,
+    public juce::Button::Listener,
+    private juce::Timer
 {
 public:
-    Tab1(CompressorTarrAudioProcessor&);
-    ~Tab1();
-    void paint (Graphics&) override;
+    Tab1(CompressorTarrAudioProcessor& p);
+    ~Tab1() override;
+
+    void paint(juce::Graphics&) override;
     void resized() override;
-    void paintDialBackground(Graphics& g, int x, int y, int width, int height);
-    void paintMixDialBackground(Graphics& g);
+    void timerCallback() override;
+    void buttonClicked(juce::Button* button) override;
     void sliderValueChanged(Slider* slider) override;
-    void buttonClicked (Button* button) override; // [2]
-    
-    void timerCallback() override; // loop, see constructor
-    
-    //*******************************************************************************
-    //member variables
-    
-    TransferFunction trans;
+    void paintDialBackground(Graphics& g, int x, int y, int width, int height);
+
 private:
-    int count;
-    float thresh;
-    float ratio;
-    float knee;
-    float input;
- 
-    Slider inputSlider;
-    Slider outputSlider;
-    Slider mixSlider;
-    Slider threshSlider;
-    Slider ratioSlider;
-    Slider kneeSlider;
-    Slider attackSlider;
-    Slider releaseSlider;
-    Slider hpfSlider;
-    
-    TextButton whiteBox;
-    ToggleButton help;
-    ToggleButton phaseInvert;
+
+    OtherLookAndFeel tabLookAndFeel;
+
+    TransferFunction trans;
+
+    // Sliders
+    juce::Slider inputSlider, outputSlider, mixSlider;
+    juce::Slider threshSlider, ratioSlider, kneeSlider;
+    juce::Slider attackSlider, releaseSlider, hpfSlider;
+
+    // Slider attachments
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> inputAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> outputAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mixAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> threshAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> ratioAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> kneeAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> attackAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> releaseAttachment;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> hpfAttachment;
+
+    // Buttons
+    juce::ToggleButton help, phaseInvert;
 
     bool isClicked = false;
-    
     //*******************************************************************************
     //initialise BubbleMessageComponents for help
     

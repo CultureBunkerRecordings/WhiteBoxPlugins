@@ -1,8 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="p5Fdm6" name="compressorTarr" projectType="audioplug" jucerVersion="5.4.7">
+<JUCERPROJECT id="p5Fdm6" name="compressorTarr" projectType="audioplug" jucerFormatVersion="1"
+              pluginFormats="buildVST3" bundleIdentifier="com.WhiteBoxPlugins.Compressor"
+              pluginName="Compressor" pluginManufacturer="WhiteBoxPlugins"
+              pluginVST3Category="Fx" pluginCode="abcd" version="1.0.0.0" pluginManufacturerCode="acdc">
   <MAINGROUP id="HL4OYZ" name="compressorTarr">
+    <GROUP id="{BEE207B5-84AC-AD1E-F2C6-B79D7B7B3DDF}" name="BinaryData">
+      <FILE id="kkAvwJ" name="knobInner.png" compile="0" resource="1" file="knobInner.png"
+            xcodeResource="0"/>
+    </GROUP>
     <GROUP id="{2981F006-58B5-5269-28B9-1D5EF414D7B1}" name="Source">
+      <FILE id="ELLJTx" name="OtherLookAndFeel.cpp" compile="1" resource="0"
+            file="Source/OtherLookAndFeel.cpp"/>
+      <FILE id="HMELRx" name="OtherLookAndFeel.h" compile="0" resource="0"
+            file="Source/OtherLookAndFeel.h"/>
       <FILE id="mvrTw6" name="TransferFunction.cpp" compile="1" resource="0"
             file="Source/TransferFunction.cpp"/>
       <FILE id="aaXxJj" name="TransferFunction.h" compile="0" resource="0"
@@ -11,8 +22,6 @@
       <FILE id="IWdBES" name="Tab1.h" compile="0" resource="0" file="Source/Tab1.h"/>
       <FILE id="kEnQF5" name="Tab2.cpp" compile="1" resource="0" file="Source/Tab2.cpp"/>
       <FILE id="Yq4EWT" name="Tab2.h" compile="0" resource="0" file="Source/Tab2.h"/>
-      <FILE id="urZTb4" name="dial.cpp" compile="1" resource="0" file="Source/dial.cpp"/>
-      <FILE id="hWgnF1" name="dial.h" compile="0" resource="0" file="Source/dial.h"/>
       <FILE id="PYjlLZ" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="o1b8HK" name="PluginProcessor.h" compile="0" resource="0"
@@ -25,7 +34,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" osxArchitecture="64BitIntel" osxCompatibility="10.10 SDK"/>
+        <CONFIGURATION isDebug="1" name="Debug" osxArchitecture="64BitIntel" osxCompatibility="10.10 SDK"
+                       macOSDeploymentTarget="10.10"/>
         <CONFIGURATION isDebug="0" name="Release"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
@@ -46,6 +56,29 @@
         <MODULEPATH id="juce_audio_utils" path="../../../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
+    <VS2022 targetFolder="Builds/VisualStudio2022">
+      <CONFIGURATIONS>
+        <CONFIGURATION isDebug="1" name="Debug"/>
+        <CONFIGURATION isDebug="0" name="Release"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_audio_basics" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_utils" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_cryptography" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_opengl" path="..\..\..\..\JUCE\modules"/>
+        <MODULEPATH id="juce_video" path="..\..\..\..\JUCE\modules"/>
+      </MODULEPATHS>
+    </VS2022>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
@@ -68,5 +101,5 @@
   <LIVE_SETTINGS>
     <OSX/>
   </LIVE_SETTINGS>
-  <JUCEOPTIONS/>
+  <JUCEOPTIONS JUCE_VST3_CAN_REPLACE_VST2="1" JUCE_PLUGINHOST_VST3="1"/>
 </JUCERPROJECT>
